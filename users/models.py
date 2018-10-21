@@ -1,9 +1,9 @@
 from django.db import models
-
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 
-from rest_framework_jwt.settings import APISettings
+from rest_framework_jwt.settings import api_settings
 
 
 class UserManager(BaseUserManager):
@@ -39,6 +39,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.CharField(max_length=512, unique=True)
     is_active = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
+    is_staff = models.BooleanField(default=False)
 
     objects = UserManager()
 
@@ -48,9 +49,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+    @staticmethod
+    def decode_jwt(jwt):
+        if not jwt:
+            return AnonymousUser()
+        jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
+        user_data = jwt_decode_handler(jwt)
+        user = User.objects.filter(id=user_data.get('user_id', 0)).first()
+        if user:
+            return user
+        return AnonymousUser()
+    
     def get_jwt(self):
-        jwt_payload_handler = APISettings.JWT_PAYLOAD_HANDLER
-        jwt_encode_handler = APISettings.JWT_ENCODE_HANDLER
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
         try:
             payload = jwt_payload_handler(self)
             token = jwt_encode_handler(payload)

@@ -33,6 +33,7 @@ class Base(Configuration):
         'django.contrib.sites',
         'django.contrib.messages',
         'django.contrib.staticfiles',
+        'django.contrib.admin',
 
         'allauth',
         'allauth.socialaccount',
@@ -45,7 +46,8 @@ class Base(Configuration):
         'rest_auth',
 
         'corsheaders',
-        'users'
+        'users',
+        'geo',
     ]
 
     MIDDLEWARE = [
@@ -123,9 +125,9 @@ class Base(Configuration):
     }
 
     REST_USE_JWT = True
-    JWT_AUTH = {
-        'JWT_EXPIRATION_DELTA': datetime.timedelta(days=365),
-    }
+    # JWT_AUTH = {
+    #     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=365),
+    # }
 
     REST_AUTH_REGISTER_SERIALIZERS = {
         'REGISTER_SERIALIZER': 'users.serializers.RegisterSerializer',
@@ -142,6 +144,10 @@ class Base(Configuration):
 
     REST_SESSION_LOGIN = False
 
+    GRAPHENE = {
+        'SCHEMA': 'api.schema.schema'
+    }
+    
     # Some really nice defaults
     ACCOUNT_AUTHENTICATION_METHOD = 'email'
     ACCOUNT_EMAIL_REQUIRED = True

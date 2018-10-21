@@ -14,13 +14,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, re_path, include
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib import admin
 
 from users.social_views import FacebookLogin
+from graphene_django.views import GraphQLView
 
 urlpatterns = [
+    re_path('^admin/?', admin.site.urls),
     re_path('^auth/register/?', include('rest_auth.registration.urls')),
     re_path('^auth/', include('rest_auth.urls')),
     re_path(r'^accounts/', include('allauth.urls')),
 
     re_path(r'^auth/facebook/?$', FacebookLogin.as_view()),
+
+    re_path(r'^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True)), name="graphql"),
 ]
