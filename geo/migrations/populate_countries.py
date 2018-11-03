@@ -10,7 +10,6 @@ def populate_countries(apps, schema_editor):
         data = json.load(f)
 
     for country in data:
-        print(country)
         continent = Continent.objects.get(alpha_2_code=country['continent'])
         country['continent'] = continent
         

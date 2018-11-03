@@ -15,7 +15,8 @@ class Activity(models.Model):
     categories = models.ManyToManyField(Category)
     duration = models.IntegerField()
     price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    location = models.ForeignKey(Location, related_name='location', on_delete=models.CASCADE)
+    media = models.FileField(upload_to='activity', null=True, blank=True)
+    # location = models.ForeignKey(Location, related_name='location', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name_plural = 'activities'

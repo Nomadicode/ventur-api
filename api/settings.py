@@ -48,6 +48,7 @@ class Base(Configuration):
         'corsheaders',
         'users',
         'geo',
+        'activities'
     ]
 
     MIDDLEWARE = [
@@ -207,6 +208,27 @@ class Base(Configuration):
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     STATIC_URL = '/static/'
 
+
+class Test(Base):
+        # SECURITY WARNING: don't run with debug turned on in production!
+    DEBUG = True
+
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'driftr',
+            'USER': 'driftr',
+            'PASSWORD': 'testpass',
+            'HOST': '127.0.0.1',
+            'PORT': '',
+        }
+    }
+
+    MIGRATION_MODULES = {
+        'geo': None
+    }
 
 class Local(Base):
     # SECURITY WARNING: don't run with debug turned on in production!
