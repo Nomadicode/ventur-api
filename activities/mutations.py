@@ -16,6 +16,9 @@ class ActivityAddMutation(graphene.Mutation):
         duration = graphene.Int(required=False)
         price = graphene.Float(required=False)
         categories = graphene.String(required=False)
+        age_ranges = graphene.String(required=False)
+        latitude = graphene.String(required=False)
+        longitude = graphene.String(required=False)
         media = graphene.String(required=False)
 
     success = graphene.Boolean()
@@ -41,6 +44,15 @@ class ActivityAddMutation(graphene.Mutation):
                 category_arr.append(category.id) 
 
             kwargs['categories'] = category_arr
+
+        if 'age_ranges' in kwargs:
+            age_ranges = kwargs['age_ranges'].split(',')
+
+            age_arr = []
+            for age_range in age_ranges:
+                age_arr.append(int(age_range))
+
+            kwargs['age_ranges'] = age_arr
 
         serializer = ActivitySerializer(data=kwargs)
 
