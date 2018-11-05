@@ -50,7 +50,7 @@ class ActivityAddMutation(graphene.Mutation):
 
             age_arr = []
             for age_range in age_ranges:
-                age_arr.append(int(age_range))
+                age_arr.append(int(age_range) + 1)
 
             kwargs['age_ranges'] = age_arr
 
