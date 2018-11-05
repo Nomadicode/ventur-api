@@ -22,7 +22,7 @@ class Activity(models.Model):
     duration = models.IntegerField()
     price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     media = models.FileField(upload_to='activity', null=True, blank=True)
-    age_range = models.ManyToManyField(AgeRange)\
+    age_ranges = models.ManyToManyField(AgeRange)
 
     class Meta:
         verbose_name_plural = 'activities'
