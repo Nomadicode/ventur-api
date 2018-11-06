@@ -1,5 +1,6 @@
 import graphene
 
+from core.schema import CoreQuery
 from geo.schema import GeoQuery
 from users.schema import UserQuery
 from activities.schema import ActivityQuery
@@ -8,7 +9,7 @@ from users import mutations as user_mutations
 from activities import mutations as activity_mutations
 
 
-class RootQuery(graphene.ObjectType, UserQuery, GeoQuery, ActivityQuery):
+class RootQuery(graphene.ObjectType, UserQuery, CoreQuery, GeoQuery, ActivityQuery):
     pass
 
 

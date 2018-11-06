@@ -46,6 +46,7 @@ class Base(Configuration):
         'rest_auth',
 
         'corsheaders',
+        'core',
         'users',
         'geo',
         'activities'
