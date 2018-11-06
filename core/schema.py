@@ -23,6 +23,5 @@ class FeedbackType(DjangoObjectType):
 class CoreQuery(graphene.AbstractType):
     feedback_categories = graphene.List(FeedbackCategoryType)
 
-
     def resolve_feedback_categories(self, info, **kwargs):
         return FeedbackCategory.objects.all()

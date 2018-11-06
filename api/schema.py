@@ -7,6 +7,7 @@ from activities.schema import ActivityQuery
 
 from users import mutations as user_mutations
 from activities import mutations as activity_mutations
+from core import mutations as core_mutations
 
 
 class RootQuery(graphene.ObjectType, UserQuery, CoreQuery, GeoQuery, ActivityQuery):
@@ -16,6 +17,7 @@ class RootQuery(graphene.ObjectType, UserQuery, CoreQuery, GeoQuery, ActivityQue
 class Mutations(graphene.ObjectType):
     update_user = user_mutations.UserUpdateMutation.Field()
     add_activity = activity_mutations.ActivityAddMutation.Field()
-
+    submit_feedback = core_mutations.SubmitFeedbackMutation.Field()
+    
 
 schema = graphene.Schema(query=RootQuery, mutation=Mutations)
