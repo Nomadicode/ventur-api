@@ -49,11 +49,15 @@ class ActivityAddMutation(graphene.Mutation):
             age_ranges = kwargs['age_ranges'].split(',')
 
             age_arr = []
-            for age_range in age_ranges:
-                age_arr.append(int(age_range) + 1)
+            age = age_ranges[0]
+            while age < age_ranges[-1]:
+                age_arr.append(age + 1)
 
             kwargs['age_ranges'] = age_arr
 
+        if 'latitude' in kwargs and 'longitude' in kwargs:
+            pass
+            
         serializer = ActivitySerializer(data=kwargs)
 
         if not serializer.is_valid():

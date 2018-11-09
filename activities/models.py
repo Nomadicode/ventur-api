@@ -1,4 +1,5 @@
 from django.db import models
+from recurrence.fields import RecurrenceField
 
 
 # Create your models here.
@@ -34,4 +35,4 @@ class Schedule(models.Model):
     start_time = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
-    
+    recurrences = RecurrenceField()

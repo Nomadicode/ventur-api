@@ -35,6 +35,7 @@ class Base(Configuration):
         'django.contrib.staticfiles',
         'django.contrib.admin',
 
+        'recurrence',
         'allauth',
         'allauth.socialaccount',
         'allauth.account',
