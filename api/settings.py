@@ -128,9 +128,11 @@ class Base(Configuration):
     }
 
     REST_USE_JWT = True
-    # JWT_AUTH = {
-    #     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=365),
-    # }
+    JWT_AUTH = {
+        'JWT_EXPIRATION_DELTA': datetime.timedelta(days=30),
+        'JWT_ALLOW_REFRESH': True,
+        'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=30),
+    }
 
     REST_AUTH_REGISTER_SERIALIZERS = {
         'REGISTER_SERIALIZER': 'users.serializers.RegisterSerializer',

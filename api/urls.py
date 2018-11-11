@@ -17,6 +17,8 @@ from django.urls import path, re_path, include
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import admin
 
+from rest_framework_jwt.views import refresh_jwt_token, verify_jwt_token
+
 from users.social_views import FacebookLogin
 from graphene_django.views import GraphQLView
 
@@ -24,9 +26,12 @@ urlpatterns = [
     re_path('^admin/?', admin.site.urls),
     re_path('^auth/register/?', include('rest_auth.registration.urls')),
     re_path('^auth/', include('rest_auth.urls')),
-    re_path(r'^accounts/', include('allauth.urls')),
+    re_path('^accounts/', include('allauth.urls')),
+    
+    re_path('^auth/refresh-token', refresh_jwt_token),
+    re_path('^auth/verify-token', verify_jwt_token),
 
-    re_path(r'^auth/facebook/?$', FacebookLogin.as_view()),
+    re_path('^auth/facebook/?$', FacebookLogin.as_view()),
 
-    re_path(r'^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True)), name="graphql"),
+    re_path('^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True)), name="graphql"),
 ]
