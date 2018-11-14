@@ -1,5 +1,6 @@
 from datetime import date, datetime, timedelta
 import pytz
+import json
 import graphene
 
 from api.helpers import get_user_from_info, base64_to_file
@@ -57,6 +58,11 @@ class ActivityAddMutation(graphene.Mutation):
 
         if 'latitude' in kwargs and 'longitude' in kwargs:
             pass
+
+        if 'schedule' in kwargs:
+            schedule = json.loads(kwargs['schedule'])
+
+            
             
         serializer = ActivitySerializer(data=kwargs)
 
