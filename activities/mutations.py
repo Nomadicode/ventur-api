@@ -33,6 +33,8 @@ class ActivityAddMutation(graphene.Mutation):
             return ActivityAddMutation(success=False, error="You must be logged in to add an activity.",
                                         activity=None)
 
+        kwargs['created_by'] = user.id
+        
         if 'media' in kwargs:
             kwargs['media'] = base64_to_file(kwargs['media'])
 
@@ -62,7 +64,7 @@ class ActivityAddMutation(graphene.Mutation):
         if 'schedule' in kwargs:
             schedule = json.loads(kwargs['schedule'])
 
-            
+
             
         serializer = ActivitySerializer(data=kwargs)
 
