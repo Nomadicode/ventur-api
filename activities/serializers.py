@@ -1,6 +1,9 @@
+import recurrence
+from recurrence import Recurrence
 from rest_framework import serializers
 
 from .models import Activity, Category
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

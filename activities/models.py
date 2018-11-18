@@ -17,6 +17,17 @@ class AgeRange(models.Model):
     max_age = models.IntegerField()
 
 
+class Schedule(models.Model):
+    frequency = models.Int(choices)
+    start = models.DateTimeField()
+    interval = models.Int(choices)
+    until = models.DateTimeField()
+    
+
+class Occurrences(models.Model):
+
+
+
 class Activity(models.Model):
     created_by = models.ForeignKey(User, related_name='activities', null=True, blank=True, on_delete=models.DO_NOTHING)
     title = models.CharField(max_length=128)
@@ -26,7 +37,7 @@ class Activity(models.Model):
     price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     media = models.FileField(upload_to='activity', null=True, blank=True)
     age_ranges = models.ManyToManyField(AgeRange)
-    recurrences = RecurrenceField(null=True, blank=True)
+    schedule = models.ForeignKey(Schedule, related_name='schedule', null=True, blank=True, on_delete=models.DO_NOTHING)
 
     class Meta:
         verbose_name_plural = 'activities'

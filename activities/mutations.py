@@ -61,11 +61,10 @@ class ActivityAddMutation(graphene.Mutation):
         if 'latitude' in kwargs and 'longitude' in kwargs:
             pass
 
-        if 'schedule' in kwargs:
-            schedule = json.loads(kwargs['schedule'])
+        # if 'schedule' in kwargs:
+        #     schedule = json.loads(kwargs['schedule'])
 
-
-            
+        
         serializer = ActivitySerializer(data=kwargs)
 
         if not serializer.is_valid():
