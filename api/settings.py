@@ -234,6 +234,7 @@ class Test(Base):
         'geo': None
     }
 
+
 class Local(Base):
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
