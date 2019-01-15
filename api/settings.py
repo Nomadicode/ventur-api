@@ -46,7 +46,8 @@ class Base(Configuration):
         'rest_auth',
 
         'corsheaders',
-        'users'
+        'users',
+        'activities'
     ]
 
     MIDDLEWARE = [

@@ -4,6 +4,7 @@ import string
 
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import AnonymousUser
+from geopy.geocoders import Nominatim
 
 from users.models import User
 
@@ -22,3 +23,27 @@ def base64_to_file(encoded_str):
     file_content = base64.b64decode(encoded_str)
     
     return ContentFile(file_content, name=file_name)
+
+
+def get_address_from_latlng(latitude, longitude):
+    geolocator = Nominatim(user_agent="driftr-app")
+    if latitude and longitude:
+        location = geolocator.reverse(str(latitude) + ", " + str(longitude))
+        return location.address
+
+    return None
+
+
+def get_latlng_from_address(address=None, city=None, state=None, location_str=None):
+    geolocator = Nominatim(user_agent="driftr-app")
+    if address and city and state:
+        location = geolocator.geocode(address + " " + city + ", " + state.abbreviation)
+
+        return location.latitude, location.longitude
+
+    if location_str:
+        location = geolocator.geocode(location_str)
+
+        return location.latitude, location.longitude
+
+    return None, None
