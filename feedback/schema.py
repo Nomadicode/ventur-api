@@ -1,7 +1,6 @@
 import graphene
 
 from graphene_django.types import DjangoObjectType
-from graphene_django import DjangoConnectionField
 
 from .models import FeedbackCategory, Feedback
 
@@ -20,8 +19,12 @@ class FeedbackType(DjangoObjectType):
         model = Feedback
 
 
-class CoreQuery(graphene.AbstractType):
+class FeedbackQuery(graphene.AbstractType):
     feedback_categories = graphene.List(FeedbackCategoryType)
+    feedback = graphene.List(FeedbackType)
 
     def resolve_feedback_categories(self, info, **kwargs):
         return FeedbackCategory.objects.all()
+
+    def resolve_feedback(self, info, **kwargs):
+        return Feedback.objects.all()

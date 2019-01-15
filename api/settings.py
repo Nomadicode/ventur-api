@@ -47,7 +47,8 @@ class Base(Configuration):
 
         'corsheaders',
         'users',
-        'activities'
+        'activities',
+        'feedback'
     ]
 
     MIDDLEWARE = [
