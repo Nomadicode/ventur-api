@@ -20,8 +20,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.Serializer):
-    first_name = serializers.CharField(required=True)
-    last_name = serializers.CharField(required=True)
+    name = serializers.CharField(required=True)
     email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
     password = serializers.CharField(required=True, write_only=True)
 
@@ -37,12 +36,16 @@ class RegisterSerializer(serializers.Serializer):
     def validate_password(self, password):
         return get_adapter().clean_password(password)
 
+    def validate_name(self, name):
+        return name
+
     def create(self, validated_data):
         User = get_user_model()
         password = validated_data.pop('password', None)
+        name = validated_data.pop('name', None)
+
         user = User(
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', ''),
+            name=name,
             email=validated_data.get('email', '')
         )
         user.set_password(password)

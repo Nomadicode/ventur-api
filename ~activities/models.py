@@ -1,5 +1,4 @@
 from django.db import models
-from recurrence.fields import RecurrenceField
 
 from users.models import User
 
@@ -12,19 +11,6 @@ class Category(models.Model):
         verbose_name_plural = 'categories'
 
 
-class AgeRange(models.Model):
-    label = models.CharField(max_length=32)
-    min_age = models.IntegerField()
-    max_age = models.IntegerField()
-
-
-# class Schedule(models.Model):
-#     frequency = models.Int(choices)
-#     start = models.DateTimeField()
-#     interval = models.Int(choices)
-#     until = models.DateTimeField()
-
-
 class Activity(models.Model):
     created_by = models.ForeignKey(User, related_name='activities', null=True, blank=True, on_delete=models.DO_NOTHING)
     title = models.CharField(max_length=128)
@@ -32,9 +18,12 @@ class Activity(models.Model):
     categories = models.ManyToManyField(Category)
     duration = models.IntegerField()
     price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    media = models.FileField(upload_to='activity', null=True, blank=True)
-    age_ranges = models.ManyToManyField(AgeRange)
-    # schedule = models.ForeignKey(Schedule, related_name='schedule', null=True, blank=True, on_delete=models.DO_NOTHING)
+    kid_friendly = models.BooleanField(default=True)
+    handicap_friendly = models.BooleanField(default=True)
+    over_18 = models.BooleanField(default=True)
+    over_21 = models.BooleanField(default=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
 
     class Meta:
         verbose_name_plural = 'activities'

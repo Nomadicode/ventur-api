@@ -35,7 +35,6 @@ class Base(Configuration):
         'django.contrib.staticfiles',
         'django.contrib.admin',
 
-        'recurrence',
         'allauth',
         'allauth.socialaccount',
         'allauth.account',
@@ -47,10 +46,7 @@ class Base(Configuration):
         'rest_auth',
 
         'corsheaders',
-        'core',
-        'users',
-        'geo',
-        'activities'
+        'users'
     ]
 
     MIDDLEWARE = [
