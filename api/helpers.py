@@ -47,3 +47,8 @@ def get_latlng_from_address(address=None, city=None, state=None, location_str=No
         return location.latitude, location.longitude
 
     return None, None
+
+
+def sanitize_category(name):
+    name = name.lower().strip()
+    return name

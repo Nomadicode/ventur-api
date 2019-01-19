@@ -3,7 +3,8 @@ import pytz
 import json
 import graphene
 
-from api.helpers import get_user_from_info, base64_to_file, get_address_from_latlng, get_latlng_from_address
+from django.db import IntegrityError
+from api.helpers import get_user_from_info, base64_to_file, get_address_from_latlng, get_latlng_from_address, sanitize_category
 
 from .models import Activity, Category, Location, Schedule
 from .serializers import ActivitySerializer
@@ -48,6 +49,8 @@ class ActivityAddMutation(graphene.Mutation):
 
             category_arr = []
             for category_name in categories:
+                # validate category name
+                category_name = sanitize_category(category_name)
                 category, created = Category.objects.get_or_create(name=category_name)
                 category_arr.append(category.id)
 
@@ -57,25 +60,31 @@ class ActivityAddMutation(graphene.Mutation):
             kwargs['kid_friendly'] = False
 
         # Set up schedule
-        start_dt = kwargs['start_date'] if 'start_date' in kwargs else datetime.now()
-        start_tm = kwargs['start_time'] if 'start_time' in kwargs else datetime.now()
+        if 'start_date' in kwargs or 'start_time' in kwargs or 'end_date' in kwargs or 'end_time' in kwargs or 'repeat' in kwargs:
+            start_dt = kwargs['start_date'] if 'start_date' in kwargs else datetime.now()
+            start_tm = kwargs['start_time'] if 'start_time' in kwargs else datetime.now()
 
-        end_dt = kwargs['end_date'] if 'end_date' in kwargs else None
-        end_tm = kwargs['end_time'] if 'end_time' in kwargs else None
+            end_dt = kwargs['end_date'] if 'end_date' in kwargs else None
+            end_tm = kwargs['end_time'] if 'end_time' in kwargs else None
 
-        repeat = kwargs['repeat'] if 'repeat' in kwargs else 'NR'
+            repeat = kwargs['repeat'] if 'repeat' in kwargs else 'NR'
 
-        # Check that end date is after start date
-        schedule_data = {
-            "start_date": datetime.strftime(start_dt, '%Y-%m-%d'),
-            "start_time": start_tm,
-            "end_date": datetime.strftime(end_dt, '%Y-%m-%d') if end_dt else None,
-            "end_time": end_tm,
-            "repeat": repeat
-        }
+            # Check that end date is after start date
+            schedule_data = {
+                "start_date": datetime.strftime(start_dt, '%Y-%m-%d'),
+                "start_time": start_tm,
+                "end_date": datetime.strftime(end_dt, '%Y-%m-%d') if end_dt else None,
+                "end_time": end_tm,
+                "repeat": repeat
+            }
 
-        schedule = Schedule.objects.create(**schedule_data)
-        kwargs['schedule'] = schedule.id
+            # validate that it succeeds
+            try:
+                schedule = Schedule.objects.create(**schedule_data)
+            except IntegrityError:
+                return ActivityAddMutation(success=False, errors="An error occurred while saving the schedule,", activity=None)
+
+            kwargs['schedule'] = schedule.id
 
         # Set up location
         location_data = {
@@ -89,7 +98,10 @@ class ActivityAddMutation(graphene.Mutation):
         elif 'address' in kwargs:
             location_data['latitude'], location_data['longitude'] = get_latlng_from_address(location_str=kwargs['address'])
 
-        location = Location.objects.create(**location_data)
+        try:
+            location = Location.objects.create(**location_data)
+        except IntegrityError:
+            return ActivityAddMutation(success=False, error="An error occurred while saving the activity's location", activity=None)
 
         kwargs['location'] = location.id
 
@@ -164,7 +176,10 @@ class ActivityDeleteMutation(graphene.Mutation):
         except Activity.DoesNotExist:
             return ActivityDeleteMutation(success=False, error="Unable to find activity")
 
-        activity.delete()
+        try:
+            activity.delete()
+        except IntegrityError:
+            return ActivityDeleteMutation(success=False, error="An error occurred attempting to delete the activity")
 
         return ActivityDeleteMutation(success=True, error=None)
 
