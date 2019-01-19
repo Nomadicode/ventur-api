@@ -29,7 +29,7 @@ class ActivityAddMutation(graphene.Mutation):
         start_time = graphene.Time(required=False)
         end_date = graphene.Date(required=False)
         end_time = graphene.Time(required=False)
-        repeat = graphene.String(required=False)
+        repeat = graphene.Int(required=False)
 
     success = graphene.Boolean()
     error = graphene.String()
@@ -67,7 +67,7 @@ class ActivityAddMutation(graphene.Mutation):
             end_dt = kwargs['end_date'] if 'end_date' in kwargs else None
             end_tm = kwargs['end_time'] if 'end_time' in kwargs else None
 
-            repeat = kwargs['repeat'] if 'repeat' in kwargs else 'NR'
+            repeat = kwargs['repeat'] if 'repeat' in kwargs else 1
 
             # Check that end date is after start date
             schedule_data = {
@@ -75,7 +75,7 @@ class ActivityAddMutation(graphene.Mutation):
                 "start_time": start_tm,
                 "end_date": datetime.strftime(end_dt, '%Y-%m-%d') if end_dt else None,
                 "end_time": end_tm,
-                "repeat": repeat
+                "repeat_id": repeat
             }
 
             # validate that it succeeds
