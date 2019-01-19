@@ -87,7 +87,7 @@ class ActivityQuery(object):
 
         if not user.is_authenticated:
             return None
-        
+
         return Activity.objects.order_by('?')[0]
 
     def resolve_repeat_intervals(self, info, **kwargs):
