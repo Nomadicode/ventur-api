@@ -1,10 +1,8 @@
-from datetime import date, datetime, timedelta
-import pytz
-import json
+from datetime import datetime
 import graphene
 
 from django.db import IntegrityError
-from api.helpers import get_user_from_info, base64_to_file, get_address_from_latlng, get_latlng_from_address, sanitize_category
+from api.helpers import get_user_from_info, get_address_from_latlng, get_latlng_from_address, sanitize_category
 
 from .models import Activity, Category, Location, Schedule
 from .serializers import ActivitySerializer
@@ -174,7 +172,7 @@ class ActivityDeleteMutation(graphene.Mutation):
         try:
             activity = Activity.objects.get(id=kwargs['pk'], created_by__id=user.id)
         except Activity.DoesNotExist:
-            return ActivityDeleteMutation(success=False, error="Unable to find activity")
+            return ActivityDeleteMutation(success=False, error="Unable to delete activity")
 
         try:
             activity.delete()
@@ -182,39 +180,3 @@ class ActivityDeleteMutation(graphene.Mutation):
             return ActivityDeleteMutation(success=False, error="An error occurred attempting to delete the activity")
 
         return ActivityDeleteMutation(success=True, error=None)
-
-
-class ActivitySaveMutation(graphene.Mutation):
-    class Arguments:
-        pk = graphene.Int(required=True)
-
-    success = graphene.Boolean()
-    error = graphene.String()
-    activity = graphene.Field(ActivityType)
-
-    def mutate(self, info, *args, **kwargs):
-        user = get_user_from_info(info)
-
-        if not user.is_authenticated:
-            return ActivitySaveMutation(success=False, error="You must be logged in to save an activity.",
-                                        activity=None)
-
-        pass
-
-
-class ActivityUnsaveMutation(graphene.Mutation):
-    class Arguments:
-        pk = graphene.Int(required=True)
-
-    success = graphene.Boolean()
-    error = graphene.String()
-    activity = graphene.Field(ActivityType)
-
-    def mutate(self, info, *args, **kwargs):
-        user = get_user_from_info(info)
-
-        if not user.is_authenticated:
-            return ActivityUnsaveMutation(success=False, error="You must be logged in to unsave an activity.",
-                                          activity=None)
-
-        pass

@@ -8,11 +8,6 @@ class RepeatOptions(models.Model):
     name = models.CharField(max_length=64)
 
 
-class ReportOptions(models.Model):
-    name = models.CharField(max_length=64)
-    detail = models.CharField(max_length=128, null=True, blank=True)
-
-
 class Category(models.Model):
     name = models.CharField(max_length=64)
 
@@ -48,11 +43,3 @@ class Activity(models.Model):
     schedule = models.ForeignKey(Schedule, related_name='schedule', on_delete=models.CASCADE, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, related_name='creator', on_delete=models.CASCADE, null=True, blank=True)
-
-
-class Report(models.Model):
-    activity = models.ForeignKey(Activity, related_name='activity', on_delete=models.CASCADE)
-    reporter = models.ForeignKey(User, related_name='reporter', on_delete=models.DO_NOTHING)
-    reason = models.ForeignKey(ReportOptions, related_name='reason', on_delete=models.DO_NOTHING)
-    detail = models.CharField(max_length=128, blank=True, null=True)
-    created = models.DateTimeField(auto_now_add=True)

@@ -33,7 +33,7 @@ def populate_repeat_options(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('activities', '0005_auto_20190119_0420')
+        ('activities', '0001_initial')
     ]
 
     operations = [
