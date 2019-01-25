@@ -8,10 +8,16 @@ from .models import User
 
 class UserType(DjangoObjectType):
     pk = graphene.Int()
+    profile_picture = graphene.String()
 
     class Meta:
         model = User
         exclude_fields = ('password',)
+
+    def resolve_profile_picture(self, info, **kwargs):
+        if self.profile_picture:
+            return self.profile_picture.url
+        return None
 
 
 class UserQuery(graphene.AbstractType):
