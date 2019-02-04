@@ -5,7 +5,6 @@ from activities.schema import ActivityQuery
 from feedback.schema import FeedbackQuery
 from reports.schema import ReportQuery
 from preferences.schema import PreferenceQuery
-from friends.schema import FriendQuery
 
 from users import mutations as user_mutations
 from activities import mutations as activity_mutations
@@ -14,7 +13,7 @@ from reports import mutations as report_mutations
 from preferences import mutations as preference_mutations
 
 
-class RootQuery(graphene.ObjectType, UserQuery, ActivityQuery, FeedbackQuery, ReportQuery, PreferenceQuery, FriendQuery):
+class RootQuery(graphene.ObjectType, UserQuery, ActivityQuery, FeedbackQuery, ReportQuery, PreferenceQuery):
     pass
 
 
