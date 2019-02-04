@@ -50,7 +50,8 @@ class Base(Configuration):
         'activities',
         'feedback',
         'reports',
-        'preferences'
+        'preferences',
+        'friends'
     ]
 
     MIDDLEWARE = [
@@ -269,6 +270,13 @@ class Dev(Base):
             'PORT': '',
         }
     }
+
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.sparkpostmail.com'
+    EMAIL_USE_TLS = True
+    EMAIL_PORT = 587
+    EMAIL_HOST_USER = 'SMTP_Injection'
+    EMAIL_HOST_PASSWORD = 'dc3d8bab7ef60d016239add6bbb4ed9089e2ff11'
 
 
 class Prod(Base):

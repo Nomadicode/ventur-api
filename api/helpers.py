@@ -29,6 +29,7 @@ def get_address_from_latlng(latitude, longitude):
     geolocator = Nominatim(user_agent="driftr-app")
     if latitude and longitude:
         location = geolocator.reverse(str(latitude) + ", " + str(longitude))
+        print(location.address)
         return location.address
 
     return None

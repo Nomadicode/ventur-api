@@ -20,7 +20,7 @@ class ReportType(DjangoObjectType):
     class Meta:
         model = Report
 
-    def resolve(self, info, **kwargs):
+    def resolve_reason(self, info, **kwargs):
         return self.reason.name
 
 
