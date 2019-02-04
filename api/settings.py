@@ -192,7 +192,6 @@ class Base(Configuration):
     # Custom user app defaults
     # Select the correct user model
     AUTH_USER_MODEL = 'users.User'
-    LOGIN_REDIRECT_URL = 'users:redirect'
     LOGIN_URL = 'account_login'
 
     # Internationalization
@@ -278,6 +277,7 @@ class Dev(Base):
     EMAIL_HOST_USER = 'SMTP_Injection'
     EMAIL_HOST_PASSWORD = 'dc3d8bab7ef60d016239add6bbb4ed9089e2ff11'
     DEFAULT_FROM_EMAIL = 'Driftr <no-reply@getdriftr.com>'
+    
 
 class Prod(Base):
     DEBUG = False
