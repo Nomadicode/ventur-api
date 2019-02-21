@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Friendship, FriendRequest
+from .models import Friendship, FriendRequest, Group
 
 
 class FriendshipSerializer(serializers.ModelSerializer):
@@ -12,4 +12,10 @@ class FriendshipSerializer(serializers.ModelSerializer):
 class FriendRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendRequest
+        fields = "__all__"
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
         fields = "__all__"

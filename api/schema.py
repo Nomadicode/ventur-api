@@ -5,23 +5,26 @@ from activities.schema import ActivityQuery
 from feedback.schema import FeedbackQuery
 from reports.schema import ReportQuery
 from preferences.schema import PreferenceQuery
+from friends.schema import FriendQuery
 
 from users import mutations as user_mutations
 from activities import mutations as activity_mutations
 from feedback import mutations as feedback_mutations
 from reports import mutations as report_mutations
 from preferences import mutations as preference_mutations
+from friends import mutations as friend_mutations
 
 
-class RootQuery(graphene.ObjectType, UserQuery, ActivityQuery, FeedbackQuery, ReportQuery, PreferenceQuery):
+class RootQuery(graphene.ObjectType, UserQuery, ActivityQuery, FeedbackQuery, ReportQuery, PreferenceQuery, FriendQuery):
     pass
 
 
 class Mutations(graphene.ObjectType):
-    update_user = user_mutations.UserUpdateMutation.Field()
+    update_profile = user_mutations.UserUpdateMutation.Field()
 
     # Activity Mutations
     add_activity = activity_mutations.ActivityAddMutation.Field()
+    # schedule_activity = activity_mutations.ActivityScheduleMutation.Field()
     delete_activity = activity_mutations.ActivityDeleteMutation.Field()
 
     # Feedback Mutations
@@ -33,8 +36,11 @@ class Mutations(graphene.ObjectType):
     # Preference Mutations
     accept_activity = preference_mutations.AcceptActivityMutation.Field()
     reject_activity = preference_mutations.RejectActivityMutation.Field()
-    save_activity = preference_mutations.SaveActivityMutation.Field()
-    unsave_activity = preference_mutations.UnsaveActivityMutation.Field()
+    # save_activity = preference_mutations.SaveActivityMutation.Field()
+    # unsave_activity = preference_mutations.UnsaveActivityMutation.Field()
+
+    # Friend Mutations
+    create_friend_group = friend_mutations.FriendGroupAddMutation.Field()
 
 
 schema = graphene.Schema(query=RootQuery, mutation=Mutations)

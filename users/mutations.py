@@ -10,8 +10,9 @@ class UserUpdateMutation(graphene.Mutation):
     class Arguments:
         name = graphene.String(required=False)
         email = graphene.String(required=False)
-        date_of_birth = graphene.String(required=False)
+        date_of_birth = graphene.Date(required=False)
         profile_picture = graphene.String(required=False)
+        handle = graphene.String(required=False)
 
     success = graphene.Boolean()
     error = graphene.String()

@@ -15,9 +15,22 @@ class CategoryType(DjangoObjectType):
 
 class ActivityType(DjangoObjectType):
     pk = graphene.Int()
+    recurrence = graphene.List(graphene.DateTime, start=graphene.DateTime(), end=graphene.DateTime())
+    media = graphene.String()
 
     class Meta:
         model = Activity
+
+    def resolve_profile_picture(self, info, **kwargs):
+        if self.media:
+            return self.media.url
+        return None
+
+    def resolve_recurrence(self, info, **kwargs):
+        if hasattr(self, 'recurrence') and self.recurrence:
+            return self.recurrence.occurrences()
+
+        return None
 
 
 class LocationType(DjangoObjectType):
@@ -68,7 +81,7 @@ class ActivityQuery(object):
         if not user.is_authenticated:
             return None
 
-        return Activity.objects.order_by('?')[0]
+        return Activity.objects.order_by('?').first()
 
     def resolve_repeat_intervals(self, info, **kwargs):
         return RepeatOptions.objects.all()

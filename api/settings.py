@@ -12,7 +12,22 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 import datetime
+import environ
 from configurations import Configuration
+
+env = environ.Env()
+ROOT_DIR = environ.Path(__file__)
+
+READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=True)
+
+if READ_DOT_ENV_FILE:
+    # Operating System Environment variables have precedence over variables defined in the .env file,
+    # that is to say variables from the .env files will only be used if not defined
+    # as environment variables.
+    env_file = str(ROOT_DIR.path('.env'))
+    print('Loading : {}'.format(env_file))
+    env.read_env(env_file)
+    print('The .env file has been loaded. See base.py for more information')
 
 
 class Base(Configuration):
@@ -22,9 +37,7 @@ class Base(Configuration):
     # SECURITY WARNING: keep the secret key used in production secret!
     SECRET_KEY = '(+bpkvj2$j%k8pm7-*(*l@1tnuc&@ds^pmm!evpv(v2-d6rps&'
 
-
     # Application definition
-
     INSTALLED_APPS = [
         # 'django.contrib.admin',
         'django.contrib.auth',
@@ -46,6 +59,8 @@ class Base(Configuration):
         'rest_auth',
 
         'corsheaders',
+        'recurrence',
+
         'users',
         'activities',
         'feedback',
@@ -127,7 +142,8 @@ class Base(Configuration):
             'rest_framework.permissions.IsAuthenticated',
         )
     }
-
+    
+    OLD_PASSWORD_FIELD_ENABLED = True
     REST_USE_JWT = True
     JWT_AUTH = {
         'JWT_EXPIRATION_DELTA': datetime.timedelta(days=30),
@@ -212,6 +228,9 @@ class Base(Configuration):
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     STATIC_URL = '/static/'
 
+    MEDIA_ROOT = ''
+    MEDIA_URL = '/media/'
+
 
 class Test(Base):
         # SECURITY WARNING: don't run with debug turned on in production!
@@ -244,10 +263,10 @@ class Local(Base):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'driftr',
-            'USER': 'driftr',
-            'PASSWORD': '93zgKhnRsYgmBLssxu6h',
-            'HOST': 'dev-db.getdriftr.com',
+            'NAME': env('DRIFTR_DB_NAME', default='driftr'),
+            'USER': env('DRIFTR_DB_USER', default='driftr'),
+            'PASSWORD': env('DRIFTR_DB_PASS', default='3wh1JOCWMfDaG8eL38pFuYLSsXL0KA'),
+            'HOST': env('DRIFTR_DB_HOST', default='localhost'),
             'PORT': '',
         }
     }
@@ -262,10 +281,10 @@ class Dev(Base):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'driftr',
-            'USER': 'driftr',
-            'PASSWORD': '93zgKhnRsYgmBLssxu6h',
-            'HOST': 'dev-db.getdriftr.com',
+            'NAME': env('DB_NAME', default='driftr'),
+            'USER': env('DB_USER', default='driftr'),
+            'PASSWORD': env('DB_PASS', default=None),
+            'HOST': env('DB_HOST', default='localhost'),
             'PORT': '',
         }
     }

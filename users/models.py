@@ -1,3 +1,5 @@
+import random
+
 from django.db import models
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -39,7 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     is_staff = models.BooleanField(default=False)
-
+    handle = models.CharField(max_length=128, unique=True, null=True, blank=True)
     profile_picture = models.FileField(upload_to='profile_pictures', null=True, blank=True)
 
     objects = UserManager()
@@ -73,4 +75,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def save(self, *args, **kwargs):
         self.email = self.email.lower()
+
+        if 'handle' not in kwargs and not self.handle:
+            name_parts = self.name.split(' ')
+            self.handle = '@' + name_parts[0] + str(random.randint(100, 999))
+
         return super(User, self).save(*args, **kwargs)

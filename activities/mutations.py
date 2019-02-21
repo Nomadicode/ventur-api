@@ -1,8 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import graphene
+import recurrence
 
 from django.db import IntegrityError
-from api.helpers import get_user_from_info, get_address_from_latlng, get_latlng_from_address, sanitize_category
+from api.helpers import get_user_from_info, get_address_from_latlng, get_latlng_from_address, base64_to_file, \
+                        sanitize_category
 
 from .models import Activity, Category, Location, Schedule
 from .serializers import ActivitySerializer
@@ -12,6 +14,7 @@ from .schema import ActivityType
 class ActivityAddMutation(graphene.Mutation):
     class Arguments:
         name = graphene.String(required=True)
+        media = graphene.String(required=False)
         description = graphene.String(required=False)
         categories = graphene.String(required=True)
         duration = graphene.Int(required=False)
@@ -23,11 +26,11 @@ class ActivityAddMutation(graphene.Mutation):
         address = graphene.String(required=False)
         latitude = graphene.Float(required=False)
         longitude = graphene.Float(required=False)
-        start_date = graphene.Date(required=False)
-        start_time = graphene.Time(required=False)
-        end_date = graphene.Date(required=False)
-        end_time = graphene.Time(required=False)
-        repeat = graphene.Int(required=False)
+        start_datetime = graphene.DateTime(required=False)
+        end_datetime = graphene.DateTime(required=False)
+        frequency = graphene.Int(required=False)
+        interval = graphene.Int(required=False)
+        days = graphene.String(required=False)
 
     success = graphene.Boolean()
     error = graphene.String()
@@ -57,32 +60,41 @@ class ActivityAddMutation(graphene.Mutation):
         if ('over_18' in kwargs and kwargs['over_18']) or ('over_21' in kwargs and kwargs['over_21']):
             kwargs['kid_friendly'] = False
 
+        if 'media' in kwargs:
+            kwargs['media'] = base64_to_file(kwargs['media'])
+
         # Set up schedule
-        if 'start_date' in kwargs or 'start_time' in kwargs or 'end_date' in kwargs or 'end_time' in kwargs or 'repeat' in kwargs:
-            start_dt = kwargs['start_date'] if 'start_date' in kwargs else datetime.now()
-            start_tm = kwargs['start_time'] if 'start_time' in kwargs else datetime.now()
+        schedule = None
+        if 'start_datetime' in kwargs or 'end_datetime' in kwargs or 'frequency' in kwargs:
+            if 'days' in kwargs:
+                days_arr = kwargs['days'].split(',')
+                days = []
+                for day in days_arr:
+                    print(day)
+                    days.append(int(day))
+            else:
+                days = None
 
-            end_dt = kwargs['end_date'] if 'end_date' in kwargs else None
-            end_tm = kwargs['end_time'] if 'end_time' in kwargs else None
-
-            repeat = kwargs['repeat'] if 'repeat' in kwargs else 1
-
-            # Check that end date is after start date
-            schedule_data = {
-                "start_date": datetime.strftime(start_dt, '%Y-%m-%d'),
-                "start_time": start_tm,
-                "end_date": datetime.strftime(end_dt, '%Y-%m-%d') if end_dt else None,
-                "end_time": end_tm,
-                "repeat_id": repeat
+            rules = {
+                "freq": kwargs['frequency'] if 'frequency' in kwargs else recurrence.DAILY
             }
 
-            # validate that it succeeds
-            try:
-                schedule = Schedule.objects.create(**schedule_data)
-            except IntegrityError:
-                return ActivityAddMutation(success=False, errors="An error occurred while saving the schedule,", activity=None)
+            if 'interval' in kwargs:
+                rules['interval'] = kwargs['interval']
 
-            kwargs['schedule'] = schedule.id
+            if days:
+                rules['byday'] = days
+
+            rrule = recurrence.Rule(**rules)
+
+            pattern = {
+                "dtstart": kwargs['start_datetime'] if 'start_datetime' in kwargs else datetime.now(),
+                "dtend": kwargs['end_datetime'] if 'end_datetime' in kwargs else datetime.now() + timedelta(days=1),
+                "rrules": [rrule, ],
+                "include_dtstart": True
+            }
+
+            schedule = recurrence.Recurrence(**pattern)
 
         # Set up location
         location_data = {
@@ -109,15 +121,19 @@ class ActivityAddMutation(graphene.Mutation):
             return ActivityAddMutation(success=False, error=str(serializer.errors), activity=None)
 
         instance = serializer.save()
+        instance.recurrence = schedule
+        instance.save()
+
         return ActivityAddMutation(success=True, error=None, activity=instance)
 
 
 class ActivityUpdateMutation(graphene.Mutation):
     class Arguments:
         pk = graphene.Int(required=True)
-        name = graphene.String(required=False)
+        name = graphene.String(required=True)
+        media = graphene.String(required=False)
         description = graphene.String(required=False)
-        categories = graphene.String(required=False)
+        categories = graphene.String(required=True)
         duration = graphene.Int(required=False)
         price = graphene.Float(required=False)
         kid_friendly = graphene.Boolean(required=False)
@@ -127,11 +143,11 @@ class ActivityUpdateMutation(graphene.Mutation):
         address = graphene.String(required=False)
         latitude = graphene.Float(required=False)
         longitude = graphene.Float(required=False)
-        start_date = graphene.Date(required=False)
-        start_time = graphene.Time(required=False)
-        end_date = graphene.Date(required=False)
-        end_time = graphene.Time(required=False)
-        repeat = graphene.String(required=False)
+        start_datetime = graphene.DateTime(required=False)
+        end_datetime = graphene.DateTime(required=False)
+        frequency = graphene.Int(required=False)
+        interval = graphene.Int(required=False)
+        days = graphene.String(required=False)
 
     success = graphene.Boolean()
     error = graphene.String()

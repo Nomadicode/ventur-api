@@ -26,7 +26,7 @@ def base64_to_file(encoded_str):
 
 
 def get_address_from_latlng(latitude, longitude):
-    geolocator = Nominatim(user_agent="driftr-app")
+    geolocator = Nominatim(user_agent="driftr-app", timeout=10)
     if latitude and longitude:
         location = geolocator.reverse(str(latitude) + ", " + str(longitude))
         print(location.address)
@@ -36,7 +36,7 @@ def get_address_from_latlng(latitude, longitude):
 
 
 def get_latlng_from_address(address=None, city=None, state=None, location_str=None):
-    geolocator = Nominatim(user_agent="driftr-app")
+    geolocator = Nominatim(user_agent="driftr-app", timeout=10)
     if address and city and state:
         location = geolocator.geocode(address + " " + city + ", " + state.abbreviation)
 
