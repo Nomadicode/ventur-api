@@ -276,7 +276,7 @@ class Dev(Base):
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
 
-    ALLOWED_HOSTS = ['api-dev.getdriftr.com', '207.246.103.228']
+    ALLOWED_HOSTS = ['api-dev.getdriftr.com', 'api-dev.driftr.app', '207.246.103.228']
 
     DATABASES = {
         'default': {
