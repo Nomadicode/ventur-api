@@ -21,11 +21,16 @@ class UserType(DjangoObjectType):
 
 
 class UserQuery(graphene.AbstractType):
-    all_users = graphene.List(UserType)
+    users = graphene.List(UserType, query=graphene.String())
     user = graphene.Field(UserType, jwt=graphene.String(), pk=graphene.Int())
 
-    def resolve_all_users(self, info, **kwargs):
-        return User.objects.all()
+    def resolve_users(self, info, **kwargs):
+        users = User.objects.filter(is_active=True)
+
+        if 'query' in kwargs:
+            users = users.filter(handle__icontains=kwargs['query'])
+
+        return users
 
     def resolve_user(self, info, **kwargs):
         if 'pk' in kwargs: 

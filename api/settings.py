@@ -281,10 +281,10 @@ class Dev(Base):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': env('DB_NAME', default='driftr'),
-            'USER': env('DB_USER', default='driftr'),
-            'PASSWORD': env('DB_PASS', default=None),
-            'HOST': env('DB_HOST', default='localhost'),
+            'NAME': 'driftr',
+            'USER': 'driftr',
+            'PASSWORD': '93zgKhnRsYgmBLssxu6h',
+            'HOST': 'dev-db.getdriftr.com',
             'PORT': '',
         }
     }
