@@ -41,6 +41,7 @@ class Mutations(graphene.ObjectType):
 
     # Friend Mutations
     create_friend_group = friend_mutations.FriendGroupAddMutation.Field()
+    create_friend_request = friend_mutations.RelationshipAddMutation.Field()
 
 
 schema = graphene.Schema(query=RootQuery, mutation=Mutations)

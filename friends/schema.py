@@ -1,23 +1,21 @@
 import graphene
-
+from django.db.models import Q
 from graphene_django.types import DjangoObjectType
 from api.helpers import get_user_from_info
 
-from .models import FriendRequest, Friendship, Group
+from .models import Relationship, Group
 
 
-class FriendshipType(DjangoObjectType):
+class RelationshipType(DjangoObjectType):
     pk = graphene.Int()
+    status = graphene.String()
 
     class Meta:
-        model = Friendship
+        model = Relationship
 
-
-class FriendRequestType(DjangoObjectType):
-    pk = graphene.Int()
-
-    class Meta:
-        model = FriendRequest
+    def resolve(self, info, **kwargs):
+        if 'status' in self:
+            return self.get_status_display()
 
 
 class GroupType(DjangoObjectType):
@@ -28,32 +26,14 @@ class GroupType(DjangoObjectType):
 
 
 class FriendQuery(object):
-    friends = graphene.List(FriendshipType)
-    sent_friend_requests = graphene.List(FriendRequestType)
-    incoming_friend_requests = graphene.List(FriendRequestType)
+    relationships = graphene.List(RelationshipType)
     friend_groups = graphene.List(GroupType)
 
-    def resolve_friends(self, info, **kwargs):
+    def resolve_relationships(self, info, **kwargs):
         user = get_user_from_info(info)
 
         if user.is_authenticated:
-            return Friendship.objects.filter(user=user)
-
-        return None
-
-    def resolve_sent_friend_requests(self, info, **kwargs):
-        user = get_user_from_info(info)
-
-        if user.is_authenticated:
-            return FriendRequest.objects.filter(initiator=user)
-
-        return None
-
-    def resolve_incoming_friend_requests(self, info, **kwargs):
-        user = get_user_from_info(info)
-
-        if user.is_authenticated:
-            return FriendRequest.objects.filter(recipient=user)
+            return Relationship.objects.filter(Q(user=user) | Q(initiator=user))
 
         return None
 

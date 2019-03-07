@@ -60,6 +60,7 @@ class Base(Configuration):
 
         'corsheaders',
         'recurrence',
+        'friendship',
 
         'users',
         'activities',
