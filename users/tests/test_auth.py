@@ -16,7 +16,7 @@ class UserAuthTest(TestCase):
     def setUp(self):
         self.email = 'test@example.com'
         self.password = 'testpass'
-        self.user = User.objects.create_user(first_name='Test', last_name='User', email=self.email, password=self.password, is_active=True)
+        self.user = User.objects.create_user(name='Test User', email=self.email, password=self.password, is_active=True)
 
     def test_user_registration(self):
         first_name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
@@ -26,8 +26,7 @@ class UserAuthTest(TestCase):
 
         url = reverse('rest_register')
         response = self.client.post(url, {
-            'first_name': first_name,
-            'last_name': last_name,
+            'name': first_name + ' ' + last_name,
             'email': email,
             'password': password
         }, format='json')
