@@ -3,19 +3,16 @@ from django.db.models import Q
 from graphene_django.types import DjangoObjectType
 from api.helpers import get_user_from_info
 
-from .models import Relationship, Group
+from users.schema import UserType
+from .models import Group
+from friendship.models import Friend, FriendshipRequest, Block
 
 
-class RelationshipType(DjangoObjectType):
+class FriendshipType(DjangoObjectType):
     pk = graphene.Int()
-    status = graphene.String()
 
     class Meta:
-        model = Relationship
-
-    def resolve(self, info, **kwargs):
-        if 'status' in self:
-            return self.get_status_display()
+        model = Friend
 
 
 class GroupType(DjangoObjectType):
@@ -25,17 +22,43 @@ class GroupType(DjangoObjectType):
         model = Group
 
 
-class FriendQuery(object):
-    relationships = graphene.List(RelationshipType)
-    friend_groups = graphene.List(GroupType)
+class FriendshipRequestType(DjangoObjectType):
+    pk = graphene.Int()
 
-    def resolve_relationships(self, info, **kwargs):
+    class Meta:
+        model = FriendshipRequest
+
+
+class FriendQuery(object):
+    friendships = graphene.List(UserType)
+    sent_friend_requests = graphene.List(FriendshipRequestType)
+    pending_friend_requests = graphene.List(FriendshipRequestType)
+    friend_groups = graphene.List(GroupType)
+    blocked_users = graphene.List(UserType)
+
+    def resolve_friendships(self, info, **kwargs):
         user = get_user_from_info(info)
 
-        if user.is_authenticated:
-            return Relationship.objects.filter(Q(user=user) | Q(initiator=user))
+        if not user.is_authenticated:
+            return None
 
-        return None
+        return Friend.objects.friends(user)
+
+    def resolve_sent_friend_requests(self, info, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return None
+
+        return FriendshipRequest.objects.filter(from_user=user)
+
+    def resolve_pending_friend_requests(self, info, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return None
+
+        return FriendshipRequest.objects.filter(to_user=user)
 
     def resolve_friend_groups(self, info, **kwargs):
         user = get_user_from_info(info)
@@ -44,3 +67,11 @@ class FriendQuery(object):
             return Group.objects.filter(creator=user)
 
         return None
+
+    def resolve_blocked_users(self, info, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return None
+
+        return Block.objects.blocking(user)

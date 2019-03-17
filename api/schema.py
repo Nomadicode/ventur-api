@@ -41,7 +41,12 @@ class Mutations(graphene.ObjectType):
 
     # Friend Mutations
     create_friend_group = friend_mutations.FriendGroupAddMutation.Field()
-    create_friend_request = friend_mutations.RelationshipAddMutation.Field()
+    create_friend_request = friend_mutations.FriendshipRequestMutation.Field()
+    accept_friend_request = friend_mutations.FriendshipRequestAcceptMutation.Field()
+    reject_friend_request = friend_mutations.FriendshipRequestRejectMutation.Field()
+    remove_friend = friend_mutations.FriendshipRemoveMutation.Field()
+    block_user = friend_mutations.BlockUserMutation.Field()
+    unblock_user = friend_mutations.UnblockUserMutation.Field()
 
 
 schema = graphene.Schema(query=RootQuery, mutation=Mutations)

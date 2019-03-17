@@ -26,7 +26,7 @@ from graphene_django.views import GraphQLView
 
 urlpatterns = [
     re_path('^admin/?', admin.site.urls),
-    re_path('^auth/register/?', include(('rest_auth.registration.urls', 'users'), namespace='users')),
+    re_path('^auth/register/?', include(('rest_auth.registration.urls', 'users'), namespace='users'), name="register"),
     re_path('^auth/', include('rest_auth.urls')),
     re_path('^accounts/', include('allauth.urls')),
     

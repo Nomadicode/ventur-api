@@ -4,9 +4,10 @@ from api.helpers import get_user_from_info, base64_to_file
 
 from users.models import User
 
-from .models import Relationship
-from .serializers import GroupSerializer, RelationshipSerializer
-from .schema import GroupType, RelationshipType
+from friendship.models import Friend, FriendshipRequest, Block
+
+from .serializers import GroupSerializer
+from .schema import GroupType, FriendshipRequestType
 
 
 class FriendGroupAddMutation(graphene.Mutation):
@@ -37,80 +38,103 @@ class FriendGroupAddMutation(graphene.Mutation):
         return FriendGroupAddMutation(success=True, error=None, group=instance)
 
 
-class RelationshipAddMutation(graphene.Mutation):
+class FriendshipRequestMutation(graphene.Mutation):
+    class Arguments:
+        handle = graphene.String(required=True)
+        message = graphene.String(required=False)
+
+    success = graphene.Boolean()
+    error = graphene.String()
+    friendship_request = graphene.Field(FriendshipRequestType)
+
+    def mutate(self, info, *args, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return FriendshipRequestMutation(success=False,
+                                             error="You must be logged in to create a friend request.",
+                                             friendship_request=None)
+
+        other_user = None
+        try:
+            other_user = User.objects.get(handle=kwargs['handle'])
+        except User.DoesNotExist:
+            return FriendshipRequestMutation(success=False,
+                                             error="Unable to find user with handle %s".format(kwargs['handle']),
+                                             friendship_request=None)
+
+        friend_request = Friend.objects.add_friend(
+            user,
+            other_user,
+            message=kwargs['message']
+        )
+
+        return FriendshipRequestMutation(success=True,
+                                         error=None,
+                                         friendship_request=friend_request)
+
+
+class FriendshipRequestAcceptMutation(graphene.Mutation):
     class Arguments:
         handle = graphene.String(required=True)
 
     success = graphene.Boolean()
     error = graphene.String()
-    relationship = graphene.Field(RelationshipType)
+    friend_request = graphene.Field(FriendshipRequestType)
 
     def mutate(self, info, *args, **kwargs):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return RelationshipAddMutation(success=False,
-                                           error="You must be logged in to create a relationship.",
-                                           relationship=None)
+            return FriendshipRequestAcceptMutation(success=False,
+                                                   error="You must be logged in to accept a friend request.",
+                                                   relationship=None)
+        other_user = None
+        try:
+            other_user = User.objects.get(handle=kwargs['handle'])
+        except User.DoesNotExist:
+            return FriendshipRequestAcceptMutation(success=False,
+                                                   error="Unable to find user with handle %s".format(kwargs['handle']),
+                                                   friendship_request=None)
 
-        kwargs['initiator'] = user.id
+        friend_request = FriendshipRequest.objects.get(to_user=user, from_user=other_user)
+        friend_request.accept()
 
-        if 'handle' in kwargs:
-            try:
-                kwargs['user'] = User.objects.get(handle=kwargs['handle']).id
-            except User.DoesNotExist:
-                return RelationshipAddMutation(success=False,
-                                               error="Unable to find user with handle %s".format(kwargs['handle']),
-                                               relationship=None)
-
-        serializer = RelationshipSerializer(data=kwargs)
-
-        if not serializer.is_valid():
-            return RelationshipAddMutation(success=False,
-                                           error=str(serializer.errors),
-                                           relationship=None)
-
-        instance = serializer.save()
-        return RelationshipAddMutation(success=True, error=None, relationship=instance)
+        return FriendshipRequestAcceptMutation(success=True, error=None, friend_request=friend_request)
 
 
-class RelationshipAcceptMutation(graphene.Mutation):
+class FriendshipRequestRejectMutation(graphene.Mutation):
     class Arguments:
-        pk = graphene.Int(required=True)
+        handle = graphene.String(required=True)
 
     success = graphene.Boolean()
     error = graphene.String()
-    relationship = graphene.Field(RelationshipType)
+    friend_request = graphene.Field(FriendshipRequestType)
 
     def mutate(self, info, *args, **kwargs):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return RelationshipAcceptMutation(success=False,
-                                              error="You must be logged in to update a relationship.",
-                                              relationship=None)
-
+            return FriendshipRequestRejectMutation(success=False,
+                                                   error="You must be logged in to accept a friend request.",
+                                                   relationship=None)
+        other_user = None
         try:
-            relationship = Relationship.objects.get(pk=kwargs['pk'], user_id=user.id)
-        except Relationship.DoesNotExist:
-            return RelationshipAcceptMutation(success=False,
-                                              error="An error occurred updating relationship")
+            other_user = User.objects.get(handle=kwargs['handle'])
+        except User.DoesNotExist:
+            return FriendshipRequestRejectMutation(success=False,
+                                                   error="Unable to find user with handle %s".format(kwargs['handle']),
+                                                   friendship_request=None)
 
-        kwargs['status'] = 2
-        serializer = RelationshipSerializer(relationship, data=kwargs, partial=True)
+        friend_request = FriendshipRequest.objects.get(to_user=user, from_user=other_user)
+        friend_request.reject()
 
-        if not serializer.is_valid():
-            return RelationshipAcceptMutation(success=False,
-                                              error=str(serializer.errors),
-                                              relationship=None)
-
-        instance = serializer.save()
-        return RelationshipAcceptMutation(success=True, error=None, relationship=instance)
+        return FriendshipRequestRejectMutation(success=True, error=None, friend_request=friend_request)
 
 
-class RelationshipRemoveMutation(graphene.Mutation):
+class FriendshipRemoveMutation(graphene.Mutation):
     class Arguments:
-        pk = graphene.Int(required=True)
+        handle = graphene.String(required=True)
 
     success = graphene.Boolean()
     error = graphene.String()
@@ -119,23 +143,77 @@ class RelationshipRemoveMutation(graphene.Mutation):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return RelationshipRemoveMutation(success=False,
-                                              error="You must be logged in to create a group.",
-                                              relationship=None)
+            return FriendshipRemoveMutation(success=False,
+                                            error="You must be logged in to remove a friend.")
 
+        other_user = None
         try:
-            relationship = Relationship.objects.get(pk=kwargs['pk'], user_id=user.id)
-        except Relationship.DoesNotExist:
-            return RelationshipAcceptMutation(success=False,
-                                              error="An error occurred updating relationship")
+            other_user = User.objects.get(handle=kwargs['handle'])
+        except User.DoesNotExist:
+            return FriendshipRemoveMutation(success=False,
+                                            error="Unable to find user with handle %s".format(kwargs['handle']))
 
-        kwargs['initiator'] = user.id
-        serializer = RelationshipSerializer(data=kwargs)
+        Friend.objects.remove_friend(
+            user,
+            other_user
+        )
 
-        if not serializer.is_valid():
-            return RelationshipAcceptMutation(success=False,
-                                              error=str(serializer.errors),
-                                              relationship=None)
+        return FriendshipRemoveMutation(success=True, error=None)
 
-        instance = serializer.save()
-        return RelationshipRemoveMutation(success=True, error=None, relationship=instance)
+
+class BlockUserMutation(graphene.Mutation):
+    class Arguments:
+        handle = graphene.String(required=True)
+
+    success = graphene.Boolean()
+    error = graphene.String()
+
+    def mutate(self, info, *args, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return BlockUserMutation(success=False,
+                                     error="You must be logged in to block a user.")
+
+        other_user = None
+        try:
+            other_user = User.objects.get(handle=kwargs['handle'])
+        except User.DoesNotExist:
+            return BlockUserMutation(success=False,
+                                     error="Unable to find user with handle %s".format(kwargs['handle']))
+
+        Block.objects.add_block(
+            user,
+            other_user
+        )
+
+        return BlockUserMutation(success=True, error=None)
+
+
+class UnblockUserMutation(graphene.Mutation):
+    class Arguments:
+        handle = graphene.String(required=True)
+
+    success = graphene.Boolean()
+    error = graphene.String()
+
+    def mutate(self, info, *args, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return UnblockUserMutation(success=False,
+                                       error="You must be logged in to unblock a user.")
+
+        other_user = None
+        try:
+            other_user = User.objects.get(handle=kwargs['handle'])
+        except User.DoesNotExist:
+            return UnblockUserMutation(success=False,
+                                            error="Unable to find user with handle %s".format(kwargs['handle']))
+
+        Block.objects.remove_block(
+            user,
+            other_user
+        )
+
+        return UnblockUserMutation(success=True, error=None)

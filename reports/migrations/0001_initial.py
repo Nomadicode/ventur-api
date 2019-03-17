@@ -10,7 +10,6 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('activities', 'populate_repeat_options'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

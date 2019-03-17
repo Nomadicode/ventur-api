@@ -9,7 +9,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('activities', 'populate_repeat_options'),
         ('preferences', '0001_initial'),
     ]
 

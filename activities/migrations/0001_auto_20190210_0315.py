@@ -7,7 +7,7 @@ import recurrence.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('activities', 'populate_repeat_options'),
+        ('activities', '0001_initial'),
     ]
 
     operations = [

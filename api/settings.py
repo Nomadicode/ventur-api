@@ -243,15 +243,11 @@ class Test(Base):
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'driftr',
-            'USER': 'driftr',
-            'PASSWORD': 'testpass',
+            'USER': 'driftrtest',
+            'PASSWORD': 'driftrtest',
             'HOST': 'localhost',
             'PORT': '',
         }
-    }
-
-    MIGRATION_MODULES = {
-        'geo': None
     }
 
 

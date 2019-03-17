@@ -24,7 +24,7 @@ class UserAuthTest(TestCase):
         email = first_name + '@example.com'
         password = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(15))
 
-        url = reverse('rest_register')
+        url = '/auth/register/'
         response = self.client.post(url, {
             'name': first_name + ' ' + last_name,
             'email': email,
@@ -42,3 +42,6 @@ class UserAuthTest(TestCase):
         })
         
         self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+    def test_password_recovery(self):
+        pass

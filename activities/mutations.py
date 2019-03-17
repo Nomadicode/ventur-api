@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from api.helpers import get_user_from_info, get_address_from_latlng, get_latlng_from_address, base64_to_file, \
                         sanitize_category
 
-from .models import Activity, Category, Location, Schedule
+from .models import Activity, Category, Location
 from .serializers import ActivitySerializer
 from .schema import ActivityType
 
@@ -70,7 +70,6 @@ class ActivityAddMutation(graphene.Mutation):
                 days_arr = kwargs['days'].split(',')
                 days = []
                 for day in days_arr:
-                    print(day)
                     days.append(int(day))
             else:
                 days = None
