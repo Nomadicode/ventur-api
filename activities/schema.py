@@ -3,7 +3,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from api.helpers import get_user_from_info
 
-from .models import Category, Activity, Location, Schedule, RepeatOptions
+from .models import Category, Activity, Location
 
 
 class CategoryType(DjangoObjectType):
@@ -40,29 +40,10 @@ class LocationType(DjangoObjectType):
         model = Location
 
 
-class RepeatOptionsType(DjangoObjectType):
-    pk = graphene.Int()
-
-    class Meta:
-        model = RepeatOptions
-
-
-class ScheduleType(DjangoObjectType):
-    pk = graphene.Int()
-    repeat = graphene.String()
-
-    class Meta:
-        model = Schedule
-
-    def resolve_repeat(self, info, **kwargs):
-        return self.repeat.name
-
-
 class ActivityQuery(object):
     activities = graphene.List(ActivityType)
     categories = graphene.List(CategoryType)
     random_activity = graphene.Field(ActivityType, latitude=graphene.Float(), longitude=graphene.Float())
-    repeat_intervals = graphene.List(RepeatOptionsType)
 
     def resolve_activities(self, info, **kwargs):
         user = get_user_from_info(info)
@@ -82,6 +63,3 @@ class ActivityQuery(object):
             return None
 
         return Activity.objects.order_by('?').first()
-
-    def resolve_repeat_intervals(self, info, **kwargs):
-        return RepeatOptions.objects.all()
