@@ -87,8 +87,8 @@ class ActivityAddMutation(graphene.Mutation):
             rrule = recurrence.Rule(**rules)
 
             pattern = {
-                "dtstart": kwargs['start_datetime'] if 'start_datetime' in kwargs else datetime.now(),
-                "dtend": kwargs['end_datetime'] if 'end_datetime' in kwargs else datetime.now() + timedelta(days=1),
+                "dtstart": datetime.strptime(kwargs['start_datetime'], '%Y-%m-%d %H:%M') if 'start_datetime' in kwargs else datetime.now(),
+                "dtend": datetime.strptime(kwargs['end_datetime'], '%Y-%m-%d %H:%M') if 'end_datetime' in kwargs else datetime.now() + timedelta(days=1),
                 "rrules": [rrule, ],
                 "include_dtstart": True
             }
