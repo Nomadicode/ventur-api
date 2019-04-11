@@ -66,7 +66,7 @@ class ActivityAddMutation(graphene.Mutation):
         # Set up schedule
         schedule = None
         if 'start_datetime' in kwargs or 'end_datetime' in kwargs or 'frequency' in kwargs:
-            if 'days' in kwargs:
+            if 'days' in kwargs and kwargs['days']:
                 days_arr = kwargs['days'].split(',')
                 days = []
                 for day in days_arr:
@@ -75,7 +75,7 @@ class ActivityAddMutation(graphene.Mutation):
                 days = None
 
             rules = {
-                "freq": kwargs['frequency'] if 'frequency' in kwargs else recurrence.DAILY
+                "freq": kwargs['frequency'] if 'frequency' in kwargs else None
             }
 
             if 'interval' in kwargs:
