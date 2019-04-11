@@ -21,7 +21,7 @@ class ActivityType(DjangoObjectType):
     class Meta:
         model = Activity
 
-    def resolve_profile_picture(self, info, **kwargs):
+    def resolve_media(self, info, **kwargs):
         if self.media:
             return self.media.url
         return None
