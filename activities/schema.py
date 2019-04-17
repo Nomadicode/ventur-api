@@ -41,7 +41,8 @@ class LocationType(DjangoObjectType):
 
 
 class ActivityQuery(object):
-    activities = graphene.List(ActivityType)
+    activities = graphene.List(ActivityType, latitude=graphene.Float(), longitude=graphene.Float(),
+                               startDate=graphene.DateTime(), endDate=graphene.DateTime())
     categories = graphene.List(CategoryType)
     random_activity = graphene.Field(ActivityType, latitude=graphene.Float(), longitude=graphene.Float())
 

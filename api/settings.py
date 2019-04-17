@@ -259,15 +259,10 @@ class Local(Base):
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': env('DRIFTR_DB_NAME', default='driftr'),
-            'USER': env('DRIFTR_DB_USER', default='driftr'),
-            'PASSWORD': env('DRIFTR_DB_PASS', default='3wh1JOCWMfDaG8eL38pFuYLSsXL0KA'),
-            'HOST': env('DRIFTR_DB_HOST', default='localhost'),
-            'PORT': '',
-        }
+        'default': env.db('DATABASE_URL', default='postgres:///driftr'),
     }
+
+    EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
     HAYSTACK_CONNECTIONS = {
         'default': {

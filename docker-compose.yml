@@ -10,6 +10,8 @@ services:
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
       - postgres_backup_dev:/backups
+    ports:
+      - "5432:5432"
     environment:
       - POSTGRES_USER=driftr
 
@@ -23,6 +25,7 @@ services:
     environment:
       - POSTGRES_USER=driftr
       - USE_DOCKER=yes
+      - DJANGO_CONFIGURATION=Local
     volumes:
       - .:/app
       - /dev/shm:/dev/shm
@@ -30,3 +33,6 @@ services:
       - "8000:8000"
     links:
       - postgres
+
+  elasticsearch:
+    build:
