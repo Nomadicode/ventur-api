@@ -34,6 +34,7 @@ urlpatterns = [
     re_path('^auth/verify-token', verify_jwt_token),
 
     re_path('^friendship/', include('friendship.urls')),
+    re_path('^search/', include('haystack.urls')),
   #  re_path('^auth/facebook/?$', FacebookLogin.as_view()),
 
     re_path('^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True)), name="graphql"),

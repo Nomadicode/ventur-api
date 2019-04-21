@@ -1,8 +1,9 @@
-version: '2'
+version: '3'
 
 volumes:
   postgres_data_dev: {}
   postgres_backup_dev: {}
+  search_data_dev: {}
 
 services:
   postgres:
@@ -15,6 +16,27 @@ services:
     environment:
       - POSTGRES_USER=driftr
 
+  search:
+    image: elasticsearch:6.7.1
+#    volumes:
+#      - search_data_dev:/usr/share/elasticsearch/data
+    environment:
+      - node.name=es01
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
   web:
     build:
       context: .
@@ -22,6 +44,7 @@ services:
     command: /start-dev.sh
     depends_on:
       - postgres
+      - search
     environment:
       - POSTGRES_USER=driftr
       - USE_DOCKER=yes
@@ -33,6 +56,4 @@ services:
       - "8000:8000"
     links:
       - postgres
-
-  elasticsearch:
-    build:
+      - search

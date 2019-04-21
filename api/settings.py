@@ -16,7 +16,7 @@ import environ
 from configurations import Configuration
 
 env = environ.Env()
-ROOT_DIR = environ.Path(__file__)
+ROOT_DIR = environ.Path(__file__) - 3
 
 READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=True)
 
@@ -89,18 +89,28 @@ class Base(Configuration):
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [],
+            'DIRS': [
+                os.path.join(BASE_DIR, 'templates/'),
+            ],
             'APP_DIRS': True,
             'OPTIONS': {
                 'context_processors': [
                     'django.template.context_processors.debug',
                     'django.template.context_processors.request',
                     'django.contrib.auth.context_processors.auth',
+                    'django.template.context_processors.i18n',
+                    'django.template.context_processors.media',
+                    'django.template.context_processors.static',
+                    'django.template.context_processors.tz',
                     'django.contrib.messages.context_processors.messages',
                 ],
             },
         },
     ]
+
+    TEMPLATE_DIRS = (
+        os.path.join(os.path.dirname(__file__), 'templates'),
+    )
 
     WSGI_APPLICATION = 'api.wsgi.application'
 
@@ -129,6 +139,7 @@ class Base(Configuration):
             'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
         },
     ]
+
     # AUTHENTICATION CONFIGURATION
     # ------------------------------------------------------------------------------
     AUTHENTICATION_BACKENDS = [
@@ -259,16 +270,24 @@ class Local(Base):
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
     DATABASES = {
-        'default': env.db('DATABASE_URL', default='postgres:///driftr'),
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'driftr',
+            'USER': 'driftr',
+            'PASSWORD': 'driftr',
+            'HOST': 'postgres',
+            'PORT': '',
+        }
     }
 
     EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
+#    HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
     HAYSTACK_CONNECTIONS = {
         'default': {
-            'ENGINE': 'haystack.backends.elasticsearch2_backend.Elasticsearch2SearchEngine',
-            'URL': 'http://127.0.0.1:9200/',
-            'INDEX_NAME': 'haystack',
+            'ENGINE': 'api.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
+            'URL': 'http://search:9200',
+            'INDEX_NAME': 'driftr',
         },
     }
 
