@@ -1,5 +1,7 @@
 import graphene
 
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.measure import D
 from graphene_django.types import DjangoObjectType
 from api.helpers import get_user_from_info
 
@@ -38,11 +40,11 @@ class LocationType(DjangoObjectType):
 
     class Meta:
         model = Location
+        exclude_fields = ('point', )
 
 
 class ActivityQuery(object):
-    activities = graphene.List(ActivityType, latitude=graphene.Float(), longitude=graphene.Float(),
-                               startDate=graphene.DateTime(), endDate=graphene.DateTime())
+    activities = graphene.List(ActivityType, latitude=graphene.Float(), longitude=graphene.Float())
     categories = graphene.List(CategoryType)
     random_activity = graphene.Field(ActivityType, latitude=graphene.Float(), longitude=graphene.Float())
 
@@ -52,7 +54,9 @@ class ActivityQuery(object):
         if not user.is_authenticated:
             return None
 
-        return Activity.objects.all()
+        location = GEOSGeometry('POINT(%s %s)' % (kwargs['longitude'], kwargs['latitude']), srid=4326)
+
+        return Activity.objects.filter(location__point__distance_lte=(location, D(mi=10)))
 
     def resolve_categories(self, info, **kwargs):
         return Category.objects.all()
@@ -63,4 +67,11 @@ class ActivityQuery(object):
         if not user.is_authenticated:
             return None
 
-        return Activity.objects.order_by('?').first()
+        if 'longitude' not in kwargs or 'latitude' not in kwargs:
+            return None
+
+        location = GEOSGeometry('POINT(%s %s)' % (kwargs['longitude'], kwargs['latitude']), srid=4326)
+
+        activity = Activity.objects.filter(location__point__distance_lte=(location, D(mi=10))).order_by('?').first()
+
+        return activity

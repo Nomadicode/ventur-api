@@ -1,4 +1,4 @@
-FROM postgres:10.7
+FROM mdillon/postgis
 
 # add backup scripts
 ADD backup.sh /usr/local/bin/backup
@@ -9,3 +9,4 @@ ADD list-backups.sh /usr/local/bin/list-backups
 RUN chmod +x /usr/local/bin/restore
 RUN chmod +x /usr/local/bin/list-backups
 RUN chmod +x /usr/local/bin/backup
+

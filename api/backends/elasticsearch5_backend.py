@@ -467,4 +467,4 @@ class Elasticsearch5SearchQuery(ElasticsearchSearchQuery):
 
 class Elasticsearch5SearchEngine(BaseEngine):
     backend = Elasticsearch5SearchBackend
-query = Elasticsearch5SearchQuery
+    query = Elasticsearch5SearchQuery

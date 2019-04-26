@@ -34,10 +34,10 @@ class Mutations(graphene.ObjectType):
     submit_report = report_mutations.ReportActivityMutation.Field()
 
     # Preference Mutations
-    accept_activity = preference_mutations.AcceptActivityMutation.Field()
+    # accept_activity = preference_mutations.AcceptActivityMutation.Field()
     reject_activity = preference_mutations.RejectActivityMutation.Field()
-    # save_activity = preference_mutations.SaveActivityMutation.Field()
-    # unsave_activity = preference_mutations.UnsaveActivityMutation.Field()
+    save_activity = preference_mutations.SaveActivityMutation.Field()
+    unsave_activity = preference_mutations.UnsaveActivityMutation.Field()
 
     # Friend Mutations
     create_friend_group = friend_mutations.FriendGroupAddMutation.Field()

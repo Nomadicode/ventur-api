@@ -47,6 +47,7 @@ class Base(Configuration):
         'django.contrib.messages',
         'django.contrib.staticfiles',
         'django.contrib.admin',
+        'django.contrib.gis',
 
         'allauth',
         'allauth.socialaccount',
@@ -59,7 +60,6 @@ class Base(Configuration):
         'rest_auth',
 
         'corsheaders',
-        'haystack',
         'recurrence',
         'friendship',
 
@@ -271,7 +271,7 @@ class Local(Base):
 
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': 'driftr',
             'USER': 'driftr',
             'PASSWORD': 'driftr',
@@ -283,13 +283,13 @@ class Local(Base):
     EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
 #    HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
-    HAYSTACK_CONNECTIONS = {
-        'default': {
-            'ENGINE': 'api.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
-            'URL': 'http://search:9200',
-            'INDEX_NAME': 'driftr',
-        },
-    }
+#     HAYSTACK_CONNECTIONS = {
+#         'default': {
+#             'ENGINE': 'api.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
+#             'URL': 'http://search:9200',
+#             'INDEX_NAME': 'driftr',
+#         },
+#     }
 
 
 class Dev(Base):

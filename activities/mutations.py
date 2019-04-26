@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import graphene
 import recurrence
 
+from django.contrib.gis.geos import GEOSGeometry
 from django.db import IntegrityError
 from api.helpers import get_user_from_info, get_address_from_latlng, get_latlng_from_address, base64_to_file, \
                         sanitize_category
@@ -99,13 +100,16 @@ class ActivityAddMutation(graphene.Mutation):
         location_data = {
             'address': kwargs['address'] if 'address' in kwargs else None,
             'latitude': kwargs['latitude'] if 'latitude' in kwargs else None,
-            'longitude': kwargs['longitude'] if 'longitude' in kwargs else None
+            'longitude': kwargs['longitude'] if 'longitude' in kwargs else None,
+            'point': None
         }
 
         if 'latitude' in kwargs and 'longitude' in kwargs:
             location_data['address'] = get_address_from_latlng(kwargs['latitude'], kwargs['longitude'])
         elif 'address' in kwargs:
             location_data['latitude'], location_data['longitude'] = get_latlng_from_address(location_str=kwargs['address'])
+
+        location_data['point'] = GEOSGeometry('POINT(%s %s)' % (location_data['longitude'], location_data['latitude']), srid=4326)
 
         try:
             location = Location.objects.create(**location_data)

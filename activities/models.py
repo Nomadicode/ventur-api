@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.gis.db import models as geomodels
+from django.contrib.gis.geos import Point
 from graphene_django.converter import convert_django_field
 from recurrence.fields import RecurrenceField
 
@@ -14,9 +16,11 @@ class Category(models.Model):
 
 
 class Location(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
     address = models.CharField(max_length=128)
     latitude = models.FloatField()
     longitude = models.FloatField()
+    point = geomodels.PointField(null=True, blank=True)
 
 
 class Activity(models.Model):
