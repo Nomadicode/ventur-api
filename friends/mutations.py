@@ -66,7 +66,7 @@ class FriendshipRequestMutation(graphene.Mutation):
         friend_request = Friend.objects.add_friend(
             user,
             other_user,
-            message=kwargs['message']
+            message= kwargs['message'] if 'message' in kwargs else None
         )
 
         return FriendshipRequestMutation(success=True,

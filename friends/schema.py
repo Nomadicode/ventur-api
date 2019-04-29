@@ -3,6 +3,7 @@ from django.db.models import Q
 from graphene_django.types import DjangoObjectType
 from api.helpers import get_user_from_info
 
+from users.models import User
 from users.schema import UserType
 from .models import Group
 from friendship.models import Friend, FriendshipRequest, Block
@@ -35,6 +36,8 @@ class FriendQuery(object):
     pending_friend_requests = graphene.List(FriendshipRequestType)
     friend_groups = graphene.List(GroupType)
     blocked_users = graphene.List(UserType)
+    get_user_by_handle = graphene.List(UserType, handle=graphene.String())
+    friend_suggestions = graphene.List(UserType)
 
     def resolve_friendships(self, info, **kwargs):
         user = get_user_from_info(info)
@@ -75,3 +78,29 @@ class FriendQuery(object):
             return None
 
         return Block.objects.blocking(user)
+
+    def resolve_get_user_by_handle(self, info, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return None
+
+        if not 'handle' in kwargs:
+            return None
+
+        users = User.objects.all().exclude(id__in=(user.id, ))
+
+        return users.filter(handle__icontains=kwargs['handle'])
+
+    def resolve_friend_suggestions(self, info, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return None
+
+        users = User.objects.all().exclude(id__in=(user.id, ))
+        # Refine by location
+
+        # Refine by shared interests
+
+        return users

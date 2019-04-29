@@ -25,7 +25,7 @@ class ActivityType(DjangoObjectType):
 
     def resolve_media(self, info, **kwargs):
         if self.media:
-            return self.media.url
+            return 'http://127.0.0.1:8000' + self.media.url
         return None
 
     def resolve_recurrence(self, info, **kwargs):

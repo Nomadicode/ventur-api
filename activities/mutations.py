@@ -64,7 +64,7 @@ class ActivityAddMutation(graphene.Mutation):
         if 'media' in kwargs:
             kwargs['media'] = base64_to_file(kwargs['media'])
 
-        # Set up schedule
+        # region Set up schedule
         schedule = None
         if 'start_datetime' in kwargs or 'end_datetime' in kwargs or 'frequency' in kwargs:
             if 'days' in kwargs and kwargs['days']:
@@ -95,8 +95,9 @@ class ActivityAddMutation(graphene.Mutation):
             }
 
             schedule = recurrence.Recurrence(**pattern)
+        # endregion
 
-        # Set up location
+        # region Set up location
         location_data = {
             'address': kwargs['address'] if 'address' in kwargs else None,
             'latitude': kwargs['latitude'] if 'latitude' in kwargs else None,
@@ -117,6 +118,7 @@ class ActivityAddMutation(graphene.Mutation):
             return ActivityAddMutation(success=False, error="An error occurred while saving the activity's location", activity=None)
 
         kwargs['location'] = location.id
+        # endregion
 
         serializer = ActivitySerializer(data=kwargs)
 
