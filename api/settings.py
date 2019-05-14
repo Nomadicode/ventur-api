@@ -186,9 +186,11 @@ class Base(Configuration):
     # Some really nice defaults
     ACCOUNT_AUTHENTICATION_METHOD = 'email'
     ACCOUNT_EMAIL_REQUIRED = True
+    ACCOUNT_UNIQUE_EMAIL = True
     ACCOUNT_USERNAME_REQUIRED = False
     ACCOUNT_EMAIL_VERIFICATION = 'optional'
     ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+    ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
 
     ACCOUNT_ALLOW_REGISTRATION = True
     # ACCOUNT_ADAPTER = 'klyp_web.users.adapters.AccountAdapter'
@@ -244,6 +246,7 @@ class Base(Configuration):
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = '/media/'
 
+    DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
 class Test(Base):
         # SECURITY WARNING: don't run with debug turned on in production!

@@ -78,6 +78,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         if 'handle' not in kwargs and not self.handle:
             name_parts = self.name.split(' ')
-            self.handle = '@' + name_parts[0] + str(random.randint(100, 999))
+            self.handle = name_parts[0].lower() + str(random.randint(100, 999))
 
         return super(User, self).save(*args, **kwargs)

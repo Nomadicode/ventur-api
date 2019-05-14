@@ -88,12 +88,25 @@ class FriendQuery(object):
         if not 'query' in kwargs:
             return []
 
+        # Remove self from results
         users = User.objects.all().exclude(id__in=(user.id, ))
+
+        # Remove users that have been sent requests
+        requests = FriendshipRequest.objects.filter(from_user__id=user.id)
+
+        pending_requests = []
+        for req in requests:
+            pending_requests.append(req.to_user.id)
+
+        users = users.exclude(id__in=pending_requests)
 
         # Check handle
         users = users.filter(Q(handle__icontains=kwargs['query']) |
                              Q(name__icontains=kwargs['query']) |
                              Q(email__icontains=kwargs['query']))
+
+        # Remove friends that have a pending request
+
 
         return users
 
@@ -103,7 +116,26 @@ class FriendQuery(object):
         if not user.is_authenticated:
             return []
 
-        users = User.objects.all().exclude(id__in=(user.id, ))
+        # Remove self from results
+        users = User.objects.all().exclude(id__in=(user.id,))
+
+        # Remove users that have been sent requests
+        requests = FriendshipRequest.objects.filter(from_user__id=user.id)
+
+        pending_requests = []
+        for req in requests:
+            pending_requests.append(req.to_user.id)
+
+        users = users.exclude(id__in=pending_requests)
+
+        # Remove users that have sent you requests
+        # requests = FriendshipRequest.objects.filter(Q(to_user__id=user.id))
+        #
+        # sent_requests = []
+        # for req in requests:
+        #     sent_requests.append(req.to_user.id)
+        #
+        # users = users.exclude(id__in=sent_requests)
         # Refine by location
 
         # Refine by shared interests

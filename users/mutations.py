@@ -2,6 +2,8 @@ import graphene
 
 from api.helpers import get_user_from_info, base64_to_file
 
+from allauth.account.models import EmailAddress
+
 from .serializers import UserDetailsSerializer
 from .schema import UserType
 
@@ -27,6 +29,11 @@ class UserUpdateMutation(graphene.Mutation):
         
         if 'profile_picture' in kwargs:
             kwargs['profile_picture'] = base64_to_file(kwargs['profile_picture'])
+
+        if 'email' in kwargs:
+            address = EmailAddress.objects.get_for_user(user, user.email)
+            address.email = kwargs['email']
+            address.save()
         
         serializer = UserDetailsSerializer(user, data=kwargs, partial=True)
 
