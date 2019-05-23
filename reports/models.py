@@ -12,7 +12,7 @@ class ReportCategory(models.Model):
 
 class Report(models.Model):
     activity = models.ForeignKey(Activity, related_name='reports', on_delete=models.CASCADE)
-    reporter = models.ForeignKey(User, related_name='reporter', on_delete=models.DO_NOTHING)
+    reporter = models.ForeignKey(User, related_name='reported_activities', on_delete=models.DO_NOTHING)
     category = models.ForeignKey(ReportCategory, related_name='reason', on_delete=models.DO_NOTHING)
     detail = models.CharField(max_length=128, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)

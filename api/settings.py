@@ -170,11 +170,7 @@ class Base(Configuration):
 
     REST_AUTH_SERIALIZERS = {
         'USER_DETAILS_SERIALIZER': ('users.serializers.'
-                                    'UserDetailsSerializer'),
-        # 'PASSWORD_RESET_CONFIRM_SERIALIZER': ('leadtracker.users.serializers.'
-        #                                       'PasswordResetConfirmSerializer'),
-        # 'PASSWORD_CHANGE_SERIALIZER': ('leadtracker.users.serializers.'
-        #                                'PasswordChangeSerializer'),
+                                    'UserDetailsSerializer')
     }
 
     REST_SESSION_LOGIN = False
@@ -193,8 +189,6 @@ class Base(Configuration):
     ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
 
     ACCOUNT_ALLOW_REGISTRATION = True
-    # ACCOUNT_ADAPTER = 'klyp_web.users.adapters.AccountAdapter'
-    # SOCIALACCOUNT_ADAPTER = 'klyp_web.users.adapters.SocialAccountAdapter'
 
     SOCIALACCOUNT_PROVIDERS = {
         'facebook': {
@@ -247,6 +241,7 @@ class Base(Configuration):
     MEDIA_URL = '/media/'
 
     DATA_UPLOAD_MAX_MEMORY_SIZE = None
+    DEFAULT_RADIUS = 10
 
 class Test(Base):
         # SECURITY WARNING: don't run with debug turned on in production!
@@ -283,16 +278,11 @@ class Local(Base):
         }
     }
 
+    SITE_DOMAIN = 'http://localhost:8000'
+
     EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
-#    HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
-#     HAYSTACK_CONNECTIONS = {
-#         'default': {
-#             'ENGINE': 'api.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
-#             'URL': 'http://search:9200',
-#             'INDEX_NAME': 'driftr',
-#         },
-#     }
+    GOOGLE_API_KEY = 'AIzaSyBFPkF998a0PltBrEP6D7aNl_Cp4XTsXxM'
 
 
 class Dev(Base):

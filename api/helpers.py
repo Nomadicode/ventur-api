@@ -4,9 +4,10 @@ import string
 
 from mimetypes import guess_extension, guess_all_extensions, guess_type
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import AnonymousUser
-from geopy.geocoders import Nominatim
+from geopy.geocoders import GoogleV3
 
 from users.models import User
 
@@ -39,9 +40,9 @@ def base64_to_file(encoded_str):
 
 
 def get_address_from_latlng(latitude, longitude):
-    geolocator = Nominatim(user_agent="driftr-app", timeout=10)
+    geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY, timeout=10)
     if latitude and longitude:
-        location = geolocator.reverse(str(latitude) + ", " + str(longitude))
+        location = geolocator.reverse(str(latitude) + ", " + str(longitude), exactly_one=True)
         print(location.address)
         return location.address
 

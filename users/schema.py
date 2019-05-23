@@ -1,5 +1,8 @@
 import graphene
 
+from django.conf import settings
+from api.helpers import get_user_from_info
+
 from graphene_django.types import DjangoObjectType
 from graphene_django import DjangoConnectionField
 
@@ -16,7 +19,7 @@ class UserType(DjangoObjectType):
 
     def resolve_profile_picture(self, info, **kwargs):
         if self.profile_picture:
-            return self.profile_picture.url
+            return settings.SITE_DOMAIN + self.profile_picture.url
         return None
 
 

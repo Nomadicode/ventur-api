@@ -41,9 +41,15 @@ class Mutations(graphene.ObjectType):
 
     # Friend Mutations
     create_friend_group = friend_mutations.FriendGroupAddMutation.Field()
+    update_friend_group = friend_mutations.FriendGroupUpdateMutation.Field()
+    remove_friend_group = friend_mutations.FriendGroupRemoveMutation.Field()
+    add_friend_to_group = friend_mutations.FriendGroupAddMemberMutation.Field()
+    remove_friend_from_group = friend_mutations.FriendGroupRemoveMemberMutation.Field()
+
     create_friend_request = friend_mutations.FriendshipRequestMutation.Field()
     accept_friend_request = friend_mutations.FriendshipRequestAcceptMutation.Field()
     reject_friend_request = friend_mutations.FriendshipRequestRejectMutation.Field()
+    cancel_friend_request = friend_mutations.FriendshipRequestCancelMutation.Field()
     remove_friend = friend_mutations.FriendshipRemoveMutation.Field()
     block_user = friend_mutations.BlockUserMutation.Field()
     unblock_user = friend_mutations.UnblockUserMutation.Field()
