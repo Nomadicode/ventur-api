@@ -208,7 +208,6 @@ class Base(Configuration):
                 'gender',
                 'updated_time'],
             'EXCHANGE_TOKEN': True,
-            'LOCALE_FUNC': lambda request: 'kr_KR',
             'VERIFIED_EMAIL': False,
             'VERSION': 'v3.1'
         }
@@ -296,8 +295,8 @@ class Dev(Base):
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'driftr',
             'USER': 'driftr',
-            'PASSWORD': '93zgKhnRsYgmBLssxu6h',
-            'HOST': 'dev-db.getdriftr.com',
+            'PASSWORD': 'FKbtweh3EDQFZ1wIxgnG2hTGbL5bY9pwZKFHBiUk',
+            'HOST': 'db-dev.driftr.app',
             'PORT': '',
         }
     }

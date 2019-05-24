@@ -21,7 +21,7 @@ from django.contrib import admin
 
 from rest_framework_jwt.views import refresh_jwt_token, verify_jwt_token
 
-# from users.social_views import FacebookLogin
+from users.social_views import FacebookLogin
 from graphene_django.views import GraphQLView
 
 urlpatterns = [
@@ -29,6 +29,8 @@ urlpatterns = [
     re_path('^auth/register/?', include(('rest_auth.registration.urls', 'users'), namespace='users'), name="register"),
     re_path('^auth/', include('rest_auth.urls')),
     re_path('^accounts/', include('allauth.urls')),
+
+    re_path('^auth/facebook', FacebookLogin.as_view(), name="fb_login"),
     
     re_path('^auth/refresh-token', refresh_jwt_token),
     re_path('^auth/verify-token', verify_jwt_token),
