@@ -239,6 +239,7 @@ class Base(Configuration):
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = '/media/'
 
+    GOOGLE_API_KEY = 'AIzaSyBFPkF998a0PltBrEP6D7aNl_Cp4XTsXxM'
     DATA_UPLOAD_MAX_MEMORY_SIZE = None
     DEFAULT_RADIUS = 10
 
@@ -281,14 +282,12 @@ class Local(Base):
 
     EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
-    GOOGLE_API_KEY = 'AIzaSyBFPkF998a0PltBrEP6D7aNl_Cp4XTsXxM'
-
 
 class Dev(Base):
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
 
-    ALLOWED_HOSTS = ['api-dev.getdriftr.com', 'api-dev.driftr.app', '207.246.103.228']
+    ALLOWED_HOSTS = ['api-dev.driftr.app', '149.28.92.216']
 
     DATABASES = {
         'default': {
@@ -301,27 +300,39 @@ class Dev(Base):
         }
     }
 
+    SITE_DOMAIN = 'https://api-dev.driftr.app'
+
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.sparkpostmail.com'
     EMAIL_USE_TLS = True
     EMAIL_PORT = 587
     EMAIL_HOST_USER = 'SMTP_Injection'
-    EMAIL_HOST_PASSWORD = 'dc3d8bab7ef60d016239add6bbb4ed9089e2ff11'
-    DEFAULT_FROM_EMAIL = 'Driftr <no-reply@getdriftr.com>'
+    EMAIL_HOST_PASSWORD = 'fd0278309f2ee7109c7d1224887b1672094e12b3'
+    DEFAULT_FROM_EMAIL = 'Driftr Dev<no-reply@driftr.app>'
 
 
 class Prod(Base):
     DEBUG = False
 
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = ['api.driftr.app', '207.246.103.228']
 
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'myproject',
-            'USER': 'myprojectuser',
-            'PASSWORD': 'password',
-            'HOST': 'localhost',
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': 'driftr',
+            'USER': 'driftr',
+            'PASSWORD': 'FKbtweh3EDQFZ1wIxgnG2hTGbL5bY9pwZKFHBiUk',
+            'HOST': 'db.driftr.app',
             'PORT': '',
         }
     }
+
+    SITE_DOMAIN = 'https://api.driftr.app'
+
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.sparkpostmail.com'
+    EMAIL_USE_TLS = True
+    EMAIL_PORT = 587
+    EMAIL_HOST_USER = 'SMTP_Injection'
+    EMAIL_HOST_PASSWORD = '7cef98ac5a99cb077bb9374d5b9cdd57a34cafe0'
+    DEFAULT_FROM_EMAIL = 'Driftr <no-reply@driftr.app>'
