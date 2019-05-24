@@ -292,7 +292,7 @@ class Dev(Base):
 
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': 'driftr',
             'USER': 'driftr',
             'PASSWORD': 'FKbtweh3EDQFZ1wIxgnG2hTGbL5bY9pwZKFHBiUk',
