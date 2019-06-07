@@ -15,6 +15,7 @@ class UserUpdateMutation(graphene.Mutation):
         date_of_birth = graphene.Date(required=False)
         profile_picture = graphene.String(required=False)
         handle = graphene.String(required=False)
+        timezone = graphene.String(required=False)
 
     success = graphene.Boolean()
     error = graphene.String()

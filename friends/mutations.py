@@ -305,6 +305,10 @@ class FriendshipRemoveMutation(graphene.Mutation):
             return FriendshipRemoveMutation(success=False,
                                             error="Unable to find user with handle %s".format(kwargs['handle']))
 
+        groups = user.friend_groups.all()
+
+        other_user.group_memberships.remove(*groups)
+
         Friend.objects.remove_friend(
             user,
             other_user

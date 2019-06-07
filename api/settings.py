@@ -35,7 +35,7 @@ class Base(Configuration):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = '(+bpkvj2$j%k8pm7-*(*l@1tnuc&@ds^pmm!evpv(v2-d6rps&'
+    SECRET_KEY = env('DJANGO_SECRET_KEY', default='(+bpkvj2$j%k8pm7-*(*l@1tnuc&@ds^pmm!evpv(v2-d6rps&')
 
     # Application definition
     INSTALLED_APPS = [
@@ -239,7 +239,7 @@ class Base(Configuration):
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = '/media/'
 
-    GOOGLE_API_KEY = 'AIzaSyBFPkF998a0PltBrEP6D7aNl_Cp4XTsXxM'
+    GOOGLE_API_KEY = env('DJANGO_GOOGLE_API_KEY')
     DATA_UPLOAD_MAX_MEMORY_SIZE = None
     DEFAULT_RADIUS = 10
 
@@ -292,10 +292,10 @@ class Dev(Base):
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': 'driftr',
-            'USER': 'driftr',
-            'PASSWORD': 'FKbtweh3EDQFZ1wIxgnG2hTGbL5bY9pwZKFHBiUk',
-            'HOST': 'db-dev.driftr.app',
+            'NAME': env('POSTGRES_DATABASE', default=""),
+            'USER': env('POSTGRES_USER', default=""),
+            'PASSWORD': env('POSTGRES_PASSWORD', default=""),
+            'HOST': env('POSTGRES_HOST', default=""),
             'PORT': '',
         }
     }
@@ -307,8 +307,8 @@ class Dev(Base):
     EMAIL_USE_TLS = True
     EMAIL_PORT = 587
     EMAIL_HOST_USER = 'SMTP_Injection'
-    EMAIL_HOST_PASSWORD = 'fd0278309f2ee7109c7d1224887b1672094e12b3'
-    DEFAULT_FROM_EMAIL = 'Driftr Dev<no-reply@driftr.app>'
+    EMAIL_HOST_PASSWORD = env('DJANGO_SPARKPOST_API_KEY', default="")
+    DEFAULT_FROM_EMAIL = env('DJANGO_FROM_EMAIL', default="")
 
 
 class Prod(Base):
@@ -319,13 +319,41 @@ class Prod(Base):
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': 'driftr',
-            'USER': 'driftr',
-            'PASSWORD': 'FKbtweh3EDQFZ1wIxgnG2hTGbL5bY9pwZKFHBiUk',
-            'HOST': 'db.driftr.app',
+            'NAME': env('POSTGRES_DATABASE', default=""),
+            'USER': env('POSTGRES_USER', default=""),
+            'PASSWORD': env('POSTGRES_PASSWORD', default=""),
+            'HOST': env('POSTGRES_HOST', default=""),
             'PORT': '',
         }
     }
+
+    # super().INSTALLED_APPS += ['storages', ]
+
+    AWS_ACCESS_KEY_ID = env('DJANGO_AWS_ACCESS_KEY_ID', default="")
+    AWS_SECRET_ACCESS_KEY = env('DJANGO_AWS_SECRET_ACCESS_KEY', default="")
+    AWS_STORAGE_BUCKET_NAME = env('DJANGO_AWS_STORAGE_BUCKET_NAME', default="")
+    AWS_AUTO_CREATE_BUCKET = True
+    AWS_QUERYSTRING_AUTH = False
+
+    # AWS cache settings, don't change unless you know what you're doing:
+    AWS_EXPIRY = 60 * 60 * 24 * 7
+
+    # TODO See: https://github.com/jschneier/django-storages/issues/47
+    # Revert the following and use str after the above-mentioned bug is fixed in
+    # either django-storage-redux or boto
+    control = 'max-age=%d, s-maxage=%d, must-revalidate' % (AWS_EXPIRY, AWS_EXPIRY)
+    AWS_HEADERS = {
+        'Cache-Control': bytes(control, encoding='latin-1')
+    }
+
+    #  See: http://stackoverflow.com/questions/10390244/
+    DEFAULT_FILE_STORAGE = 'api.s3utils.MediaRootS3BotoStorage'
+    MEDIA_URL = 'https://%s.s3.amazonaws.com/media/' % AWS_STORAGE_BUCKET_NAME
+
+    # Static Assets
+    # ------------------------
+    STATICFILES_STORAGE = 'api.s3utils.StaticRootS3BotoStorage'
+    STATIC_URL = 'https://%s.s3.amazonaws.com/static/' % AWS_STORAGE_BUCKET_NAME
 
     SITE_DOMAIN = 'https://api.driftr.app'
 
@@ -334,5 +362,5 @@ class Prod(Base):
     EMAIL_USE_TLS = True
     EMAIL_PORT = 587
     EMAIL_HOST_USER = 'SMTP_Injection'
-    EMAIL_HOST_PASSWORD = '7cef98ac5a99cb077bb9374d5b9cdd57a34cafe0'
-    DEFAULT_FROM_EMAIL = 'Driftr <no-reply@driftr.app>'
+    EMAIL_HOST_PASSWORD = env('DJANGO_SPARKPOST_API_KEY', default="")
+    DEFAULT_FROM_EMAIL = env('DJANGO_FROM_EMAIL', default="")

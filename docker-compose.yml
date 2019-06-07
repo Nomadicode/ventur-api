@@ -44,10 +44,8 @@ services:
     command: /start-dev.sh
     depends_on:
       - postgres
-    environment:
-      - POSTGRES_USER=driftr
-      - USE_DOCKER=yes
-      - DJANGO_CONFIGURATION=Local
+    env_file:
+      - ./deploy/api/.env.local
     volumes:
       - .:/app
       - /dev/shm:/dev/shm

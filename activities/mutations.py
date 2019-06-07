@@ -61,6 +61,7 @@ class ActivityAddMutation(graphene.Mutation):
         if ('over_18' in kwargs and kwargs['over_18']) or ('over_21' in kwargs and kwargs['over_21']):
             kwargs['kid_friendly'] = False
 
+        print(kwargs['media'])
         if 'media' in kwargs:
             kwargs['media'] = base64_to_file(kwargs['media'])
 

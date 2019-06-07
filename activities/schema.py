@@ -1,6 +1,7 @@
 import graphene
 from datetime import datetime, timedelta
 
+from django.utils import timezone
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D
@@ -20,6 +21,8 @@ class CategoryType(DjangoObjectType):
 
 class ActivityType(DjangoObjectType):
     pk = graphene.Int()
+    next_occurrence = graphene.DateTime()
+    prev_occurrence = graphene.DateTime()
     recurrence = graphene.List(graphene.DateTime, start=graphene.DateTime(), end=graphene.DateTime())
     media = graphene.String()
     saved = graphene.Boolean()
@@ -30,6 +33,18 @@ class ActivityType(DjangoObjectType):
     def resolve_media(self, info, **kwargs):
         if self.media:
             return 'http://127.0.0.1:8000' + self.media.url
+        return None
+
+    def resolve_next_occurrence(self, info, **kwargs):
+        if hasattr(self, 'recurrence') and self.recurrence:
+            return self.recurrence.after(datetime.now(), inc=True)
+
+        return None
+
+    def resolve_prev_occurrence(self, info, **kwargs):
+        if hasattr(self, 'recurrence') and self.recurrence:
+            return self.recurrence.before(datetime.now(), inc=True)
+
         return None
 
     def resolve_recurrence(self, info, **kwargs):
@@ -64,12 +79,19 @@ class LocationType(DjangoObjectType):
 
 
 class ActivityQuery(object):
+    activity = graphene.Field(ActivityType, pk=graphene.Int(required=True))
     activities = graphene.List(ActivityType, latitude=graphene.Float(), longitude=graphene.Float(), saved=graphene.Boolean(),
                                radius=graphene.Int(), start_date=graphene.DateTime(), end_date=graphene.DateTime(),
-                               upcoming=graphene.Boolean())
+                               upcoming=graphene.Boolean(), page=graphene.Int())
     categories = graphene.List(CategoryType)
     random_activity = graphene.Field(ActivityType, latitude=graphene.Float(), longitude=graphene.Float(),
                                      radius=graphene.Int(), price=graphene.Int())
+
+
+    def resolve_activity(self, info, **kwargs):
+        activity = Activity.objects.get(id=kwargs['pk'])
+
+        return activity
 
     def resolve_activities(self, info, **kwargs):
         user = get_user_from_info(info)
@@ -132,7 +154,17 @@ class ActivityQuery(object):
 
             activities = activities.exclude(id__in=excluded_activities)
 
-        return activities
+        activities = activities.order_by('name')
+
+        page_size = 10
+        start = 0
+        end = page_size
+
+        if 'page' in kwargs:
+            start = (kwargs['page'] - 1) * page_size
+            end = start + page_size
+
+        return activities[start:end]
 
     def resolve_categories(self, info, **kwargs):
         return Category.objects.all()

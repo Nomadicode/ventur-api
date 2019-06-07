@@ -25,8 +25,8 @@ def base64_to_file(encoded_str):
     ext = format.split('/')[-1]
 
     file_name = 'media_' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) + '.' + ext
-    print(file_name)
-    return ContentFile(base64.b64decode(imgstr), name=file_name)
+    file_contents = base64.b64decode(imgstr)
+    return ContentFile(file_contents, name=file_name)
     # file_type = guess_type(encoded_str)
     # print(file_type)
     # extension = guess_all_extensions(file_type[0])[-1]
@@ -43,7 +43,6 @@ def get_address_from_latlng(latitude, longitude):
     geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY, timeout=10)
     if latitude and longitude:
         location = geolocator.reverse(str(latitude) + ", " + str(longitude), exactly_one=True)
-        print(location.address)
         return location.address
 
     return None
@@ -53,12 +52,10 @@ def get_latlng_from_address(address=None, city=None, state=None, location_str=No
     geolocator = Nominatim(user_agent="driftr-app", timeout=10)
     if address and city and state:
         location = geolocator.geocode(address + " " + city + ", " + state.abbreviation)
-
         return location.latitude, location.longitude
 
     if location_str:
         location = geolocator.geocode(location_str)
-
         return location.latitude, location.longitude
 
     return None, None
