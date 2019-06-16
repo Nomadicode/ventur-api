@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from dateutil import parser
 import graphene
 import recurrence
 
@@ -32,6 +33,7 @@ class ActivityAddMutation(graphene.Mutation):
         frequency = graphene.Int(required=False)
         interval = graphene.Int(required=False)
         days = graphene.String(required=False)
+        groups = graphene.String(required=False)
 
     success = graphene.Boolean()
     error = graphene.String()
@@ -61,7 +63,6 @@ class ActivityAddMutation(graphene.Mutation):
         if ('over_18' in kwargs and kwargs['over_18']) or ('over_21' in kwargs and kwargs['over_21']):
             kwargs['kid_friendly'] = False
 
-        print(kwargs['media'])
         if 'media' in kwargs:
             kwargs['media'] = base64_to_file(kwargs['media'])
 
@@ -89,8 +90,8 @@ class ActivityAddMutation(graphene.Mutation):
             rrule = recurrence.Rule(**rules)
 
             pattern = {
-                "dtstart": datetime.strptime(kwargs['start_datetime'], '%Y-%m-%d %H:%M') if 'start_datetime' in kwargs else datetime.now(),
-                "dtend": datetime.strptime(kwargs['end_datetime'], '%Y-%m-%d %H:%M') if 'end_datetime' in kwargs else datetime.now() + timedelta(days=1),
+                "dtstart": parser.parse(kwargs['start_datetime']) if 'start_datetime' in kwargs else datetime.now(),
+                "dtend": parser.parse(kwargs['end_datetime']) if 'end_datetime' in kwargs else datetime.now() + timedelta(days=1),
                 "rrules": [rrule, ],
                 "include_dtstart": True
             }
@@ -120,6 +121,9 @@ class ActivityAddMutation(graphene.Mutation):
 
         kwargs['location'] = location.id
         # endregion
+
+        if 'groups' in kwargs:
+            pass
 
         serializer = ActivitySerializer(data=kwargs)
 

@@ -34,7 +34,7 @@ class FriendQuery(object):
     friendships = graphene.List(UserType)
     sent_friend_requests = graphene.List(FriendshipRequestType)
     pending_friend_requests = graphene.List(FriendshipRequestType)
-    friend_groups = graphene.List(GroupType)
+    friend_groups = graphene.List(GroupType, query=graphene.String())
     blocked_users = graphene.List(UserType)
     search_users = graphene.List(UserType, query=graphene.String())
     friend_suggestions = graphene.List(UserType)
@@ -67,7 +67,12 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if user.is_authenticated:
-            return Group.objects.filter(creator=user)
+            groups = Group.objects.filter(creator=user)
+
+            if 'query' in kwargs:
+                groups = groups.filter(name__icontains=kwargs['query'])
+
+            return groups
 
         return None
 

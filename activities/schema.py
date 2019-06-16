@@ -32,18 +32,18 @@ class ActivityType(DjangoObjectType):
 
     def resolve_media(self, info, **kwargs):
         if self.media:
-            return 'http://127.0.0.1:8000' + self.media.url
+            return settings.SITE_DOMAIN + self.media.url
         return None
 
     def resolve_next_occurrence(self, info, **kwargs):
         if hasattr(self, 'recurrence') and self.recurrence:
-            return self.recurrence.after(datetime.now(), inc=True)
+            return self.recurrence.after(timezone.now(), inc=True)
 
         return None
 
     def resolve_prev_occurrence(self, info, **kwargs):
         if hasattr(self, 'recurrence') and self.recurrence:
-            return self.recurrence.before(datetime.now(), inc=True)
+            return self.recurrence.before(timezone.now(), inc=True)
 
         return None
 
@@ -141,7 +141,7 @@ class ActivityQuery(object):
 
             # Refine to available activities
             next_week = timedelta(days=7)
-            start_date = kwargs['start_date'] if 'start_date' in kwargs else datetime.now()
+            start_date = kwargs['start_date'] if 'start_date' in kwargs else timezone.now()
             end_date = kwargs['end_date'] if 'end_date' in kwargs else start_date + next_week
 
             excluded_activities = []
@@ -193,8 +193,8 @@ class ActivityQuery(object):
         activity = activity.exclude(reports__reporter__id=user.id)
 
         # Narrow to upcoming today
-        start_date = datetime.now()
-        end_date = datetime.now().replace(hour=23, minute=59, second=59)
+        start_date = timezone.now()
+        end_date = timezone.now().replace(hour=23, minute=59, second=59)
         excluded_activities = []
         for curr_activity in activity:
             if getattr(curr_activity, 'recurrence'):

@@ -12,7 +12,7 @@ django-cors-headers==2.4.0
 django-environ==0.4.5
 django-friendship==1.8.0
 django-haystack==2.8.1
-django-recurrence==1.7.0
+django-recurrence==1.9.0
 django-rest-auth==0.9.3
 django-rest-framework==0.1.0
 django-storages==1.7.1

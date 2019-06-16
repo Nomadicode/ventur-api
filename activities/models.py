@@ -6,7 +6,7 @@ from graphene_django.converter import convert_django_field
 from recurrence.fields import RecurrenceField
 
 from users.models import User
-
+from friends.models import Group
 
 # Create your models here.
 class Category(models.Model):
@@ -37,6 +37,7 @@ class Activity(models.Model):
     over_18 = models.BooleanField(default=False)
     over_21 = models.BooleanField(default=False)
     recurrence = RecurrenceField(blank=True, null=True)
+    groups = models.ManyToManyField(Group, related_name='allowed_groups', blank=True)
     created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, related_name='creator', on_delete=models.CASCADE, null=True, blank=True)
 
