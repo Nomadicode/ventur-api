@@ -43,7 +43,7 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return None
+            raise Exception('Authentication Error')
 
         return Friend.objects.friends(user)
 
@@ -51,7 +51,7 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return None
+            raise Exception('Authentication Error')
 
         return FriendshipRequest.objects.filter(from_user=user, rejected__isnull=True)
 
@@ -59,28 +59,28 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return None
+            raise Exception('Authentication Error')
 
         return FriendshipRequest.objects.filter(to_user=user, rejected__isnull=True)
 
     def resolve_friend_groups(self, info, **kwargs):
         user = get_user_from_info(info)
 
-        if user.is_authenticated:
-            groups = Group.objects.filter(creator=user)
+        if not user.is_authenticated:
+            raise Exception('Authentication Error')
 
-            if 'query' in kwargs:
-                groups = groups.filter(name__icontains=kwargs['query'])
+        groups = Group.objects.filter(creator=user)
 
-            return groups
+        if 'query' in kwargs:
+            groups = groups.filter(name__icontains=kwargs['query'])
 
-        return None
+        return groups
 
     def resolve_blocked_users(self, info, **kwargs):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return []
+            raise Exception('Authentication Error')
 
         return Block.objects.blocking(user)
 
@@ -88,7 +88,7 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return []
+            raise Exception('Authentication Error')
 
         if not 'query' in kwargs:
             return []
@@ -136,7 +136,7 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return []
+            raise Exception('Authentication Error')
 
         # Remove self from results
         users = User.objects.all().exclude(id__in=(user.id,))

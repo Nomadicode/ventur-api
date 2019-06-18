@@ -97,7 +97,7 @@ class ActivityQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return None
+            raise Exception('Authentication Error')
 
         location = GEOSGeometry('POINT(%s %s)' % (kwargs['longitude'], kwargs['latitude']), srid=4326)
         distance = kwargs['radius'] if 'radius' in kwargs else settings.DEFAULT_RADIUS
@@ -173,10 +173,10 @@ class ActivityQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return None
+            raise Exception('Authentication Error')
 
         if 'longitude' not in kwargs or 'latitude' not in kwargs:
-            return None
+            raise Exception('Missing Parameters')
 
         location = GEOSGeometry('POINT(%s %s)' % (kwargs['longitude'], kwargs['latitude']), srid=4326)
         distance = kwargs['radius'] if 'radius' in kwargs else settings.DEFAULT_RADIUS

@@ -36,7 +36,7 @@ class PreferenceQuery(graphene.AbstractType):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return None
+            raise Exception('Authentication Error')
 
         return AcceptedActivity.objects.filter(user_id=user.id)
 
@@ -44,7 +44,7 @@ class PreferenceQuery(graphene.AbstractType):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return None
+            raise Exception('Authentication Error')
 
         return RejectedActivity.objects.filter(user_id=user.id)
 
@@ -52,6 +52,6 @@ class PreferenceQuery(graphene.AbstractType):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return None
+            raise Exception('Authentication Error')
 
         return SavedActivity.objects.filter(user_id=user.id)
