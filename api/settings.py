@@ -16,7 +16,7 @@ import environ
 from configurations import Configuration
 
 env = environ.Env()
-ROOT_DIR = environ.Path(__file__) - 3
+ROOT_DIR = environ.Path(__file__) - 2
 
 READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=True)
 
@@ -239,7 +239,7 @@ class Base(Configuration):
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = '/media/'
 
-    GOOGLE_API_KEY = env('DJANGO_GOOGLE_API_KEY')
+    GOOGLE_API_KEY = env('DJANGO_GOOGLE_API_KEY', default='')
     DATA_UPLOAD_MAX_MEMORY_SIZE = None
     DEFAULT_RADIUS = 10
 
@@ -259,7 +259,6 @@ class Test(Base):
             'PORT': '',
         }
     }
-
 
 class Local(Base):
     # SECURITY WARNING: don't run with debug turned on in production!
