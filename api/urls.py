@@ -26,16 +26,16 @@ from graphene_django.views import GraphQLView
 
 urlpatterns = [
     re_path('^admin/?', admin.site.urls),
-    re_path('^auth/register/?', include(('rest_auth.registration.urls', 'users'), namespace='users'), name="register"),
-    re_path('^auth/', include('rest_auth.urls')),
-    re_path('^accounts/', include('allauth.urls')),
+    re_path('^auth/register/?', csrf_exempt(include(('rest_auth.registration.urls', 'users')), namespace='users'), name="register"),
+    re_path('^auth/', csrf_exempt(include('rest_auth.urls'))),
+    re_path('^accounts/', csrf_exempt(include('allauth.urls'))),
 
-    re_path('^auth/facebook', FacebookLogin.as_view(), name="fb_login"),
+    re_path('^auth/facebook', csrf_exempt(FacebookLogin.as_view()), name="fb_login"),
     
-    re_path('^auth/refresh-token', refresh_jwt_token),
-    re_path('^auth/verify-token', verify_jwt_token),
+    re_path('^auth/refresh-token', csrf_exempt(refresh_jwt_token)),
+    re_path('^auth/verify-token', csrf_exempt(verify_jwt_token)),
 
-    re_path('^friendship/', include('friendship.urls')),
+    re_path('^friendship/', csrf_exempt(include('friendship.urls'))),
     # re_path('^search/', include('haystack.urls')),
   #  re_path('^auth/facebook/?$', FacebookLogin.as_view()),
 
