@@ -85,8 +85,6 @@ class Base(Configuration):
     
     CORS_ORIGIN_ALLOW_ALL = True
 
-    CORS
-
     ROOT_URLCONF = 'api.urls'
 
     TEMPLATES = [
