@@ -76,6 +76,7 @@ class Base(Configuration):
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
+        'corsheaders.middleware.CorsPostCsrfMiddleware'
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
@@ -83,6 +84,8 @@ class Base(Configuration):
     ]
     
     CORS_ORIGIN_ALLOW_ALL = True
+
+    CORS_REPLACE_HTTPS_REFERER = True
 
     ROOT_URLCONF = 'api.urls'
 
@@ -149,7 +152,6 @@ class Base(Configuration):
 
     REST_FRAMEWORK = {
         'DEFAULT_AUTHENTICATION_CLASSES': (
-            'api.authentication.CsrfExemptTokenAuthentication.CsrfExemptTokenAuthentication',
             'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         ),
         'DEFAULT_PERMISSION_CLASSES': (
