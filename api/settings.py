@@ -76,8 +76,7 @@ class Base(Configuration):
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
-        'api.middleware.DisableCsrfMiddleware.DisableCSRF',
-        # 'django.middleware.csrf.CsrfViewMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -150,6 +149,7 @@ class Base(Configuration):
 
     REST_FRAMEWORK = {
         'DEFAULT_AUTHENTICATION_CLASSES': (
+            'api.authentication.CsrfExemptTokenAuthentication.CsrfExemptTokenAuthentication',
             'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         ),
         'DEFAULT_PERMISSION_CLASSES': (
