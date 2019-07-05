@@ -281,7 +281,6 @@ class Local(Base):
 
     EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
-
 class Dev(Base):
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
@@ -308,7 +307,6 @@ class Dev(Base):
     EMAIL_HOST_USER = 'SMTP_Injection'
     EMAIL_HOST_PASSWORD = env('DJANGO_SPARKPOST_API_KEY', default="")
     DEFAULT_FROM_EMAIL = env('DJANGO_FROM_EMAIL', default="")
-
 
 class Prod(Base):
     DEBUG = False

@@ -6,7 +6,7 @@ from allauth.utils import email_address_exists
 from allauth.account.adapter import get_adapter
 from rest_framework import serializers
 
-from .models import User
+from .models import User, UserSettings
 
 
 class UserDetailsSerializer(serializers.ModelSerializer):
@@ -17,6 +17,12 @@ class UserDetailsSerializer(serializers.ModelSerializer):
         model = User
         exclude = ('password', )
         read_only_fields = ('pk', )
+
+
+class UserSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSettings
+        fields = "__all__"
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -50,6 +56,8 @@ class RegisterSerializer(serializers.Serializer):
         )
         user.set_password(password)
         user.save()
+
+        user_settings = UserSettings.objects.create(user=user)
         return user
 
     def save(self, request=None):

@@ -1,4 +1,5 @@
 import random
+import uuid
 
 from django.db import models
 from django.contrib.auth.models import AnonymousUser
@@ -35,6 +36,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256)
     date_of_birth = models.DateField(blank=True, null=True)
     email = models.CharField(max_length=512, unique=True)
@@ -82,3 +84,18 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.handle = name_parts[0].lower() + str(random.randint(100, 999))
 
         return super(User, self).save(*args, **kwargs)
+
+
+class UserSettings(models.Model):
+    user = models.ForeignKey(User, related_name='settings', on_delete=models.CASCADE)
+    show_alcohol = models.BooleanField(default=False)
+    show_nsfw = models.BooleanField(default=False)
+    handicap_only = models.BooleanField(default=False)
+    new_friend_event_notification = models.BooleanField(default=True)
+    upcoming_saved_event_notification = models.BooleanField(default=True)
+
+
+class AccountDeleteRequest(models.Model):
+    user = models.OneToOneField(User, related_name="delete_request", on_delete=models.CASCADE, unique=True)
+    request_date = models.DateTimeField(auto_now_add=True)
+    errors = models.CharField(max_length=256, null=True, blank=True)

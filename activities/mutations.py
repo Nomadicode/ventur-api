@@ -8,7 +8,9 @@ from django.db import IntegrityError
 from api.helpers import get_user_from_info, get_address_from_latlng, get_latlng_from_address, base64_to_file, \
                         sanitize_category
 
-from .models import Activity, Category, Location
+from friends.models import Group
+
+from .models import Activity, Category, Location, Schedule, REPEAT_CHOICES
 from .serializers import ActivitySerializer
 from .schema import ActivityType
 
@@ -18,21 +20,20 @@ class ActivityAddMutation(graphene.Mutation):
         name = graphene.String(required=True)
         media = graphene.String(required=False)
         description = graphene.String(required=False)
-        categories = graphene.String(required=True)
+        categories = graphene.String(required=False)
         duration = graphene.Int(required=False)
         price = graphene.Float(required=False)
-        kid_friendly = graphene.Boolean(required=False)
+        minimum_age = graphene.Int(required=False)
+        maximum_age = graphene.Int(required=False)
         handicap_friendly = graphene.Boolean(required=False)
-        over_18 = graphene.Boolean(required=False)
-        over_21 = graphene.Boolean(required=False)
+        is_nsfw = graphene.Boolean(required=False)
+        alcohol_present = graphene.Boolean(required=False)
         address = graphene.String(required=False)
         latitude = graphene.Float(required=False)
         longitude = graphene.Float(required=False)
         start_datetime = graphene.String(required=False)
         end_datetime = graphene.String(required=False)
         frequency = graphene.Int(required=False)
-        interval = graphene.Int(required=False)
-        days = graphene.String(required=False)
         groups = graphene.String(required=False)
 
     success = graphene.Boolean()
@@ -60,43 +61,21 @@ class ActivityAddMutation(graphene.Mutation):
 
             kwargs['categories'] = category_arr
 
-        if ('over_18' in kwargs and kwargs['over_18']) or ('over_21' in kwargs and kwargs['over_21']):
-            kwargs['kid_friendly'] = False
-
         if 'media' in kwargs:
             kwargs['media'] = base64_to_file(kwargs['media'])
 
         # region Set up schedule
-        schedule = None
-        if 'start_datetime' in kwargs or 'end_datetime' in kwargs or 'frequency' in kwargs:
-            if 'days' in kwargs and kwargs['days']:
-                days_arr = kwargs['days'].split(',')
-                days = []
-                for day in days_arr:
-                    days.append(int(day))
-            else:
-                days = None
+        if ('start_datetime' in kwargs and kwargs['start_datetime']) or ('end_datetime' in kwargs and kwargs['end_datetime']):
+            schedule = Schedule(
+                start=parser.parse(kwargs['start_datetime']),
+                end=parser.parse(kwargs['end_datetime'])
+            )
 
-            rules = {
-                "freq": kwargs['frequency'] if 'frequency' in kwargs else None
-            }
+            if 'frequency' in kwargs and kwargs['frequency'] > -1:
+                frequency = REPEAT_CHOICES[kwargs['frequency']] if kwargs['frequency'] < 4 else None
 
-            if 'interval' in kwargs:
-                rules['interval'] = kwargs['interval']
-
-            if days:
-                rules['byday'] = days
-
-            rrule = recurrence.Rule(**rules)
-
-            pattern = {
-                "dtstart": parser.parse(kwargs['start_datetime']) if 'start_datetime' in kwargs else datetime.now(),
-                "dtend": parser.parse(kwargs['end_datetime']) if 'end_datetime' in kwargs else datetime.now() + timedelta(days=1),
-                "rrules": [rrule, ],
-                "include_dtstart": True
-            }
-
-            schedule = recurrence.Recurrence(**pattern)
+                if frequency:
+                    schedule.repeat = 'RRULE:FREQ=' + frequency
         # endregion
 
         # region Set up location
@@ -123,7 +102,12 @@ class ActivityAddMutation(graphene.Mutation):
         # endregion
 
         if 'groups' in kwargs:
-            pass
+            groups = kwargs['groups'].split(',')
+            kwargs['groups'] = []
+
+            for group_id in groups:
+                if group_id.isdigit():
+                    kwargs['groups'].append(int(group_id))
 
         serializer = ActivitySerializer(data=kwargs)
 
@@ -131,19 +115,21 @@ class ActivityAddMutation(graphene.Mutation):
             return ActivityAddMutation(success=False, error=str(serializer.errors), activity=None)
 
         instance = serializer.save()
-        instance.recurrence = schedule
-        instance.save()
+        schedule.event = instance
+        schedule.save()
+        # instance.recurrence = schedule
+        # instance.save()
 
         return ActivityAddMutation(success=True, error=None, activity=instance)
 
 
 class ActivityUpdateMutation(graphene.Mutation):
     class Arguments:
-        pk = graphene.Int(required=True)
+        pk = graphene.ID(required=True)
         name = graphene.String(required=True)
         media = graphene.String(required=False)
         description = graphene.String(required=False)
-        categories = graphene.String(required=True)
+        categories = graphene.String(required=False)
         duration = graphene.Int(required=False)
         price = graphene.Float(required=False)
         kid_friendly = graphene.Boolean(required=False)
@@ -184,7 +170,7 @@ class ActivityUpdateMutation(graphene.Mutation):
 
 class ActivityDeleteMutation(graphene.Mutation):
     class Arguments:
-        pk = graphene.Int(required=True)
+        pk = graphene.ID(required=True)
 
     success = graphene.Boolean()
     error = graphene.String()

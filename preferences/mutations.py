@@ -9,7 +9,7 @@ from .schema import AcceptedActivityType, RejectedActivityType, SavedActivityTyp
 
 class AcceptActivityMutation(graphene.Mutation):
     class Arguments:
-        activity = graphene.Int(required=True)
+        activity = graphene.ID(required=True)
 
     success = graphene.Boolean()
     error = graphene.String()
@@ -41,7 +41,7 @@ class AcceptActivityMutation(graphene.Mutation):
 
 class RejectActivityMutation(graphene.Mutation):
     class Arguments:
-        activity = graphene.Int(required=True)
+        activity = graphene.ID(required=True)
 
     success = graphene.Boolean()
     error = graphene.String()
@@ -73,7 +73,7 @@ class RejectActivityMutation(graphene.Mutation):
 
 class SaveActivityMutation(graphene.Mutation):
     class Arguments:
-        activity = graphene.Int(required=True)
+        activity = graphene.ID(required=True)
 
     success = graphene.Boolean()
     error = graphene.String()
@@ -106,7 +106,7 @@ class SaveActivityMutation(graphene.Mutation):
 
 class UnsaveActivityMutation(graphene.Mutation):
     class Arguments:
-        activity = graphene.Int(required=True)
+        activity = graphene.ID(required=True)
 
     success = graphene.Boolean()
     error = graphene.String()

@@ -1,4 +1,7 @@
 import graphene
+import json
+import pytz
+from dateutil import parser
 from datetime import datetime, timedelta
 
 from django.utils import timezone
@@ -20,10 +23,9 @@ class CategoryType(DjangoObjectType):
 
 
 class ActivityType(DjangoObjectType):
-    pk = graphene.Int()
+    pk = graphene.ID()
     next_occurrence = graphene.DateTime()
-    prev_occurrence = graphene.DateTime()
-    recurrence = graphene.List(graphene.DateTime, start=graphene.DateTime(), end=graphene.DateTime())
+    distance = graphene.Float()
     media = graphene.String()
     saved = graphene.Boolean()
 
@@ -36,22 +38,18 @@ class ActivityType(DjangoObjectType):
         return None
 
     def resolve_next_occurrence(self, info, **kwargs):
-        if hasattr(self, 'recurrence') and self.recurrence:
-            return self.recurrence.after(timezone.now(), inc=True)
+        next_occurrence = self.next_occurrence()
+
+        if next_occurrence:
+            return next_occurrence[0]
 
         return None
 
-    def resolve_prev_occurrence(self, info, **kwargs):
-        if hasattr(self, 'recurrence') and self.recurrence:
-            return self.recurrence.before(timezone.now(), inc=True)
+    def resolve_distance(self, info, **kwargs):
+        if 'latitude' in kwargs and 'longitude' in kwargs:
+            print(kwargs['latitude'], kwargs['longitude'])
 
-        return None
-
-    def resolve_recurrence(self, info, **kwargs):
-        if hasattr(self, 'recurrence') and self.recurrence:
-            return self.recurrence.occurrences()
-
-        return None
+        return 5.5
 
     def resolve_saved(self, info, **kwargs):
         user = get_user_from_info(info)
@@ -79,10 +77,9 @@ class LocationType(DjangoObjectType):
 
 
 class ActivityQuery(object):
-    activity = graphene.Field(ActivityType, pk=graphene.Int(required=True))
+    activity = graphene.Field(ActivityType, pk=graphene.ID(required=True))
     activities = graphene.List(ActivityType, latitude=graphene.Float(), longitude=graphene.Float(), saved=graphene.Boolean(),
-                               radius=graphene.Int(), start_date=graphene.DateTime(), end_date=graphene.DateTime(),
-                               upcoming=graphene.Boolean(), page=graphene.Int())
+                               filters=graphene.String(), page=graphene.Int(), created_by=graphene.ID())
     categories = graphene.List(CategoryType)
     random_activity = graphene.Field(ActivityType, latitude=graphene.Float(), longitude=graphene.Float(),
                                      radius=graphene.Int(), price=graphene.Int())
@@ -100,63 +97,74 @@ class ActivityQuery(object):
             raise Exception('Authentication Error')
 
         location = GEOSGeometry('POINT(%s %s)' % (kwargs['longitude'], kwargs['latitude']), srid=4326)
-        distance = kwargs['radius'] if 'radius' in kwargs else settings.DEFAULT_RADIUS
+        # distance = kwargs['radius'] if 'radius' in kwargs else settings.DEFAULT_RADIUS
 
-        if 'saved' in kwargs and kwargs['saved']:
-            activities = Activity.objects.filter(saved_activities__user__id=user.id)
+        activities = Activity.objects.all()
 
-            # Refine to upcoming
-            if 'start_date' in kwargs:
-                start_date = kwargs['start_date']
-                excluded_activities = []
-                for activity in activities:
-                    if getattr(activity, 'recurrence'):
-                        recurrences = activity.recurrence.after(start_date, inc=True)
-
-                        if not recurrences:
-                            excluded_activities.append(activity.id)
-
-                activities = activities.exclude(id__in=excluded_activities)
-
-            elif 'end_date' in kwargs:
-                end_date = kwargs['end_date']
-                excluded_activities = []
-                for activity in activities:
-                    if getattr(activity, 'recurrence'):
-                        recurrences = activity.recurrence.before(end_date, inc=True)
-
-                        if not recurrences:
-                            excluded_activities.append(activity.id)
-
-                    activities = activities.exclude(id__in=excluded_activities)
+        if 'created_by' in kwargs and kwargs['created_by']:
+            activities = activities.filter(created_by__id=kwargs['created_by'])
         else:
-            # Refine to location
-            activities = Activity.objects.filter(location__point__distance_lte=(location, D(mi=distance)))
+            if 'saved' in kwargs and kwargs['saved']:
+                activities = activities.filter(saved_activities__user__id=user.id)
 
-            # Remove reported activities with > 3 reports
+            # Refine to my location
+            distance = settings.DEFAULT_RADIUS
+            if 'filters' in kwargs:
+                filters = json.loads(kwargs['filters'].replace("\'", "\"").replace('None', 'null'))
+
+                if 'radius' in filters and filters['radius']:
+                    distance = filters['radius']
+
+            activities = activities.filter(location__point__distance_lte=(location, D(mi=distance)))
+
+            # Remove activities with > 3 reports
             activities = activities.annotate(report_count=Count('reports')).filter(report_count__lt=3)
 
-            # Remove user reported activities
+            # Remove activities reported by requesting user
             activities = activities.exclude(reports__reporter__id=user.id)
 
-            # Refine to available activities
-            next_week = timedelta(days=7)
-            start_date = kwargs['start_date'] if 'start_date' in kwargs else timezone.now()
-            end_date = kwargs['end_date'] if 'end_date' in kwargs else start_date + next_week
+            # Handle User Preferences
+            user_settings = user.settings.first()
 
-            excluded_activities = []
-            for activity in activities:
-                if getattr(activity, 'recurrence'):
-                    recurrences = activity.recurrence.between(start_date, end_date, inc=True)
+            if user_settings:
+                if user_settings.handicap_only:
+                    activities = activities.filter(handicap_friendly=True)
 
-                    if len(recurrences) == 0:
-                        excluded_activities.append(activity.id)
+                if not user_settings.show_nsfw:
+                    activities = activities.filter(is_nsfw=False)
 
-            activities = activities.exclude(id__in=excluded_activities)
+                if not user_settings.show_alcohol:
+                    activities = activities.filter(alcohol_present=False)
 
-        activities = activities.order_by('name')
+            # Handle filters
+            if 'filters' in kwargs:
+                filters = json.loads(kwargs['filters'].replace("\'","\"").replace('None', 'null'))
 
-        page_size = 10
+                if 'startDate' in filters and 'endDate' in filters:
+                    start_date = parser.parse(filters['startDate'])
+                    end_date = parser.parse(filters['endDate'])
+                    # start_date = pytz.utc.localize(datetime.strptime(filters['startDate'], '%Y-%m-%d'))
+                    # end_date = pytz.utc.localize(datetime.strptime(filters['endDate'], '%Y-%m-%d'))
+
+                    activities = activities.for_period(from_date=start_date, to_date=end_date, exact=True)
+                    # for activity in activities:
+                    #     if hasattr(activity, 'recurrence'):
+                    #         recurrences = activity.recurrence.between(start_date, end_date, inc=True)
+                    #
+                    #         if len(recurrences) == 0:
+                    #             excluded_activities.append(activity.id)
+                    #
+                    # activities = activities.exclude(id__in=excluded_activities)
+
+                if 'price' in filters and filters['price']:
+                    activities = activities.filter(price__lte=filters['price'])
+
+                if 'duration' in filters and filters['duration']:
+                    activities = activities.filter(duration__lte=filters['duration'])
+
+        activities = activities.sort_by_next()
+
+        page_size = 3
         start = 0
         end = page_size
 
@@ -193,17 +201,17 @@ class ActivityQuery(object):
         activity = activity.exclude(reports__reporter__id=user.id)
 
         # Narrow to upcoming today
-        start_date = timezone.now()
-        end_date = timezone.now().replace(hour=23, minute=59, second=59)
-        excluded_activities = []
-        for curr_activity in activity:
-            if getattr(curr_activity, 'recurrence'):
-                recurrences = curr_activity.recurrence.between(start_date, end_date, inc=True)
-
-                if len(recurrences) == 0:
-                    excluded_activities.append(curr_activity.id)
-
-        activity = activity.exclude(id__in=excluded_activities)
+        # start_date = timezone.now()
+        # end_date = timezone.now().replace(hour=23, minute=59, second=59)
+        # excluded_activities = []
+        # for curr_activity in activity:
+        #     if getattr(curr_activity, 'recurrence'):
+        #         recurrences = curr_activity.recurrence.between(start_date, end_date, inc=True)
+        #
+        #         if len(recurrences) == 0:
+        #             excluded_activities.append(curr_activity.id)
+        #
+        # activity = activity.exclude(id__in=excluded_activities)
 
         activity = activity.order_by('?').first()
 

@@ -21,10 +21,11 @@ class RootQuery(graphene.ObjectType, UserQuery, ActivityQuery, FeedbackQuery, Re
 
 class Mutations(graphene.ObjectType):
     update_profile = user_mutations.UserUpdateMutation.Field()
+    update_user_settings = user_mutations.UserSettingsUpdateMutation.Field()
+    request_account_delete = user_mutations.RequestAccountDelete.Field()
 
     # Activity Mutations
     add_activity = activity_mutations.ActivityAddMutation.Field()
-    # schedule_activity = activity_mutations.ActivityScheduleMutation.Field()
     delete_activity = activity_mutations.ActivityDeleteMutation.Field()
 
     # Feedback Mutations
@@ -34,7 +35,6 @@ class Mutations(graphene.ObjectType):
     submit_report = report_mutations.ReportActivityMutation.Field()
 
     # Preference Mutations
-    # accept_activity = preference_mutations.AcceptActivityMutation.Field()
     reject_activity = preference_mutations.RejectActivityMutation.Field()
     save_activity = preference_mutations.SaveActivityMutation.Field()
     unsave_activity = preference_mutations.UnsaveActivityMutation.Field()

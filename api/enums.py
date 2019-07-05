@@ -27,3 +27,7 @@ class ReportOptions(Enum):
     @classmethod
     def choices(cls):
         return tuple((i.name, i.value) for i in cls)
+
+
+class Errors(Enum):
+    AUTH = "Authentication Error: You must be logged in to perform the requested action."

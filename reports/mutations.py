@@ -11,7 +11,7 @@ from .schema import ReportType
 
 class ReportActivityMutation(graphene.Mutation):
     class Arguments:
-        activity = graphene.Int(required=True)
+        activity = graphene.ID(required=True)
         category = graphene.Int(required=True)
         detail = graphene.String(required=False)
 

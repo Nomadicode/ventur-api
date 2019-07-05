@@ -6,12 +6,19 @@ from api.helpers import get_user_from_info
 from graphene_django.types import DjangoObjectType
 from graphene_django import DjangoConnectionField
 
-from .models import User
+from .models import User, UserSettings
+
+class UserSettingsType(DjangoObjectType):
+    pk = graphene.Int()
+
+    class Meta:
+        model = UserSettings
 
 
 class UserType(DjangoObjectType):
     pk = graphene.Int()
     profile_picture = graphene.String()
+    settings = graphene.Field(UserSettingsType)
 
     class Meta:
         model = User
@@ -21,6 +28,16 @@ class UserType(DjangoObjectType):
         if self.profile_picture:
             return settings.SITE_DOMAIN + self.profile_picture.url
         return None
+
+    def resolve_settings(self, info, **kwargs):
+        user = get_user_from_info(info)
+        if not user.is_authenticated:
+            return None
+
+        if user.id != self.id:
+            return None
+
+        return self.settings.first()
 
 
 class UserQuery(graphene.AbstractType):

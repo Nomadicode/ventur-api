@@ -3,9 +3,10 @@ import graphene
 from api.helpers import get_user_from_info, base64_to_file
 
 from allauth.account.models import EmailAddress
-
-from .serializers import UserDetailsSerializer
-from .schema import UserType
+from api.enums import Errors
+from .models import AccountDeleteRequest
+from .serializers import UserDetailsSerializer, UserSettingsSerializer
+from .schema import UserType, UserSettingsType
 
 
 class UserUpdateMutation(graphene.Mutation):
@@ -43,3 +44,54 @@ class UserUpdateMutation(graphene.Mutation):
 
         instance = serializer.save()
         return UserUpdateMutation(success=True, error=None, user=instance)
+
+
+class UserSettingsUpdateMutation(graphene.Mutation):
+    class Arguments:
+        show_alcohol = graphene.Boolean(required=False)
+        show_nsfw = graphene.Boolean(required=False)
+        handicap_only = graphene.Boolean(required=False)
+        new_friend_event_notification = graphene.Boolean(required=False)
+        upcoming_saved_event_notification = graphene.Boolean(required=False)
+
+    success = graphene.Boolean()
+    error = graphene.String()
+    user_settings = graphene.Field(UserSettingsType)
+
+    def mutate(self, info, *args, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return UserSettingsUpdateMutation(success=False, error=Errors.AUTH,
+                                      user_settings=None)
+
+        settings = user.settings.first()
+
+        if not settings:
+            settings = UserSettings.objects.create(user=user)
+
+        serializer = UserSettingsSerializer(settings, data=kwargs, partial=True)
+
+        if not serializer.is_valid():
+            return UserSettingsUpdateMutation(success=False, error=str(serializer.errors), user_settings=None)
+
+        instance = serializer.save()
+        return UserSettingsUpdateMutation(success=True, error=None, user_settings=instance)
+
+
+class RequestAccountDelete(graphene.Mutation):
+    class Arguments:
+        pk = graphene.Int(required=True)
+
+    success = graphene.Boolean()
+    error = graphene.String()
+
+    def mutate(self, info, *args, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return RequestAccountDelete(success=False, error=Errors.AUTH)
+
+        AccountDeleteRequest.objects.create(user=user)
+
+        return RequestAccountDelete(success=True, error=None)
