@@ -1,8 +1,9 @@
 import graphene
 from django.db.models import Q
 from graphene_django.types import DjangoObjectType
-from api.helpers import get_user_from_info
+from api.helpers import get_user_from_info, get_distance
 
+from api.enums import Errors
 from users.models import User
 from users.schema import UserType
 from .models import Group
@@ -10,7 +11,7 @@ from friendship.models import Friend, FriendshipRequest, Block
 
 
 class FriendshipType(DjangoObjectType):
-    pk = graphene.Int()
+    pk = graphene.ID()
 
     class Meta:
         model = Friend
@@ -24,7 +25,7 @@ class GroupType(DjangoObjectType):
 
 
 class FriendshipRequestType(DjangoObjectType):
-    pk = graphene.Int()
+    pk = graphene.ID()
 
     class Meta:
         model = FriendshipRequest
@@ -43,7 +44,7 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            raise Exception('Authentication Error')
+            raise Exception(Errors.AUTH)
 
         return Friend.objects.friends(user)
 
@@ -51,7 +52,7 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            raise Exception('Authentication Error')
+            raise Exception(Errors.AUTH)
 
         return FriendshipRequest.objects.filter(from_user=user, rejected__isnull=True)
 
@@ -59,7 +60,7 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            raise Exception('Authentication Error')
+            raise Exception(Errors.AUTH)
 
         return FriendshipRequest.objects.filter(to_user=user, rejected__isnull=True)
 
@@ -67,7 +68,7 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            raise Exception('Authentication Error')
+            raise Exception(Errors.AUTH)
 
         groups = Group.objects.filter(creator=user)
 
@@ -80,7 +81,7 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            raise Exception('Authentication Error')
+            raise Exception(Errors.AUTH)
 
         return Block.objects.blocking(user)
 
@@ -88,7 +89,7 @@ class FriendQuery(object):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            raise Exception('Authentication Error')
+            raise Exception(Errors.AUTH)
 
         if not 'query' in kwargs:
             return []
@@ -168,6 +169,14 @@ class FriendQuery(object):
         users = users.exclude(id__in=existing_friends)
 
         # Refine by location
+        discard_distance = []
+        for suggest in users:
+            if suggest.location and user.location:
+                distance = get_distance(user.location, suggest.location).split(' ')[0]
+                if float(distance) > 10.0:
+                    discard_distance.append(suggest.id)
+
+        users = users.exclude(id__in=discard_distance)
 
         # Refine by shared interests
 

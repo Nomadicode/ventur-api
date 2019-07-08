@@ -8,9 +8,10 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D
+from geopy import distance
 from django.db.models import Count
 from graphene_django.types import DjangoObjectType
-from api.helpers import get_user_from_info
+from api.helpers import get_user_from_info, get_distance
 
 from .models import Category, Activity, Location
 
@@ -25,7 +26,7 @@ class CategoryType(DjangoObjectType):
 class ActivityType(DjangoObjectType):
     pk = graphene.ID()
     next_occurrence = graphene.DateTime()
-    distance = graphene.Float()
+    distance = graphene.String()
     media = graphene.String()
     saved = graphene.Boolean()
 
@@ -46,10 +47,14 @@ class ActivityType(DjangoObjectType):
         return None
 
     def resolve_distance(self, info, **kwargs):
-        if 'latitude' in kwargs and 'longitude' in kwargs:
-            print(kwargs['latitude'], kwargs['longitude'])
+        user = get_user_from_info(info)
 
-        return 5.5
+        if user.is_authenticated:
+            if user.location:
+                destination = "{} {}".format(self.location.latitude, self.location.longitude)
+                return get_distance(user.location, destination)
+
+        return None
 
     def resolve_saved(self, info, **kwargs):
         user = get_user_from_info(info)
@@ -107,6 +112,9 @@ class ActivityQuery(object):
             if 'saved' in kwargs and kwargs['saved']:
                 activities = activities.filter(saved_activities__user__id=user.id)
 
+            # Remove if restricted to a group user is not a member of
+            groups = list(User.objects.get
+
             # Refine to my location
             distance = settings.DEFAULT_RADIUS
             if 'filters' in kwargs:
@@ -143,18 +151,8 @@ class ActivityQuery(object):
                 if 'startDate' in filters and 'endDate' in filters:
                     start_date = parser.parse(filters['startDate'])
                     end_date = parser.parse(filters['endDate'])
-                    # start_date = pytz.utc.localize(datetime.strptime(filters['startDate'], '%Y-%m-%d'))
-                    # end_date = pytz.utc.localize(datetime.strptime(filters['endDate'], '%Y-%m-%d'))
 
                     activities = activities.for_period(from_date=start_date, to_date=end_date, exact=True)
-                    # for activity in activities:
-                    #     if hasattr(activity, 'recurrence'):
-                    #         recurrences = activity.recurrence.between(start_date, end_date, inc=True)
-                    #
-                    #         if len(recurrences) == 0:
-                    #             excluded_activities.append(activity.id)
-                    #
-                    # activities = activities.exclude(id__in=excluded_activities)
 
                 if 'price' in filters and filters['price']:
                     activities = activities.filter(price__lte=filters['price'])
@@ -164,7 +162,7 @@ class ActivityQuery(object):
 
         activities = activities.sort_by_next()
 
-        page_size = 3
+        page_size = 10
         start = 0
         end = page_size
 
@@ -199,19 +197,14 @@ class ActivityQuery(object):
 
         # Remove user reported activities
         activity = activity.exclude(reports__reporter__id=user.id)
-
+        print(len(activity))
         # Narrow to upcoming today
-        # start_date = timezone.now()
-        # end_date = timezone.now().replace(hour=23, minute=59, second=59)
-        # excluded_activities = []
-        # for curr_activity in activity:
-        #     if getattr(curr_activity, 'recurrence'):
-        #         recurrences = curr_activity.recurrence.between(start_date, end_date, inc=True)
-        #
-        #         if len(recurrences) == 0:
-        #             excluded_activities.append(curr_activity.id)
-        #
-        # activity = activity.exclude(id__in=excluded_activities)
+        start_date = datetime.now()
+        end_date = datetime.now().replace(hour=23, minute=59, second=59)
+        print(start_date, end_date)
+        activity = activity.for_period(from_date=start_date, to_date=end_date, exact=True)
+
+        print(len(activity))
 
         activity = activity.order_by('?').first()
 

@@ -17,6 +17,8 @@ class UserUpdateMutation(graphene.Mutation):
         profile_picture = graphene.String(required=False)
         handle = graphene.String(required=False)
         timezone = graphene.String(required=False)
+        latitude = graphene.Float(required=False)
+        longitude = graphene.Float(required=False)
 
     success = graphene.Boolean()
     error = graphene.String()

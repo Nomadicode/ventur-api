@@ -23,7 +23,10 @@ class Category(models.Model):
     name = models.CharField(max_length=64)
 
     class Meta:
-        verbose_name = 'Categories'
+        verbose_name_plural = 'Categories'
+
+    def __str__(self):
+        return self.name
 
 
 class Location(models.Model):
@@ -33,6 +36,8 @@ class Location(models.Model):
     longitude = models.FloatField()
     point = geomodels.PointField(null=True, blank=True)
 
+    def __str__(self):
+        return self.address
 
 class Activity(BaseEvent):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
@@ -52,6 +57,11 @@ class Activity(BaseEvent):
     created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, related_name='creator', on_delete=models.CASCADE, null=True, blank=True)
 
+    class Meta:
+        verbose_name_plural = 'Activities'
+
+    def __str__(self):
+        return '{} -> {}'.format(self.id, self.name)
 
 class Schedule(BaseOccurrence):
     event = models.ForeignKey(Activity, related_name="schedule", on_delete=models.CASCADE)

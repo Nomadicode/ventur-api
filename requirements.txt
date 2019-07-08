@@ -23,6 +23,7 @@ djangorestframework-jwt==1.11.0
 elasticsearch>=5.0.0,<6.0.0
 geographiclib==1.49
 geopy==1.19.0
+googlemaps==3.0.2
 graphene==2.1.6
 graphene-django==2.3.2
 graphql-core==2.2

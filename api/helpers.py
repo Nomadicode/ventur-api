@@ -1,6 +1,7 @@
 import base64
 import random
 import string
+import googlemaps
 
 from mimetypes import guess_extension, guess_all_extensions, guess_type
 
@@ -19,7 +20,6 @@ def get_user_from_info(info):
         return User.decode_jwt(jwt)
     return AnonymousUser()
 
-
 def base64_to_file(encoded_str):
     format, imgstr = encoded_str.split(';base64,')
     ext = format.split('/')[-1]
@@ -27,17 +27,6 @@ def base64_to_file(encoded_str):
     file_name = 'media_' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) + '.' + ext
     file_contents = base64.b64decode(imgstr)
     return ContentFile(file_contents, name=file_name)
-    # file_type = guess_type(encoded_str)
-    # print(file_type)
-    # extension = guess_all_extensions(file_type[0])[-1]
-    # print(extension)
-    # file_name = 'media_' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) + extension
-    # file_path = '/tmp/' + file_name
-    # file_content = base64.b64decode(encoded_str)
-    #
-    # print(file_name)
-    # return ContentFile(file_content, name=file_name)
-
 
 def get_address_from_latlng(latitude, longitude):
     geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY, timeout=10)
@@ -46,7 +35,6 @@ def get_address_from_latlng(latitude, longitude):
         return location.address
 
     return None
-
 
 def get_latlng_from_address(address=None, city=None, state=None, location_str=None):
     geolocator = Nominatim(user_agent="driftr-app", timeout=10)
@@ -60,6 +48,14 @@ def get_latlng_from_address(address=None, city=None, state=None, location_str=No
 
     return None, None
 
+def get_distance(origin=None, destination=None, unit='imperial'):
+    gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
+    distance = gmaps.distance_matrix(origin, destination, units=unit)
+
+    if distance['status'] != 'OK':
+        return None
+
+    return distance['rows'][0]['elements'][0]['distance']['text']
 
 def sanitize_category(name):
     name = name.lower().strip()

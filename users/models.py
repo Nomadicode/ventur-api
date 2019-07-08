@@ -46,6 +46,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     handle = models.CharField(max_length=128, unique=True, null=True, blank=True)
     profile_picture = models.FileField(upload_to='profile_pictures', null=True, blank=True)
     timezone = models.CharField(max_length=128, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     objects = UserManager()
 
@@ -75,6 +77,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         except:
             token = ''
         return token
+
+    @property
+    def location(self):
+        if self.latitude and self.longitude:
+            return '{} {}'.format(self.latitude, self.longitude)
+
+        return None
 
     def save(self, *args, **kwargs):
         self.email = self.email.lower()
