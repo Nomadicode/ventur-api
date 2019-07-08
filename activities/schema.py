@@ -113,7 +113,6 @@ class ActivityQuery(object):
                 activities = activities.filter(saved_activities__user__id=user.id)
 
             # Remove if restricted to a group user is not a member of
-            groups = list(User.objects.get
 
             # Refine to my location
             distance = settings.DEFAULT_RADIUS

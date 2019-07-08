@@ -9,8 +9,12 @@ class ReportCategory(models.Model):
     name = models.CharField(max_length=64)
     detail = models.CharField(max_length=128, null=True, blank=True)
 
+    class Meta:
+        verbose_name_plural = 'Report Categories'
+
     def __str__(self):
         return self.name
+
 
 
 class Report(models.Model):
@@ -19,6 +23,10 @@ class Report(models.Model):
     category = models.ForeignKey(ReportCategory, related_name='reason', on_delete=models.DO_NOTHING)
     detail = models.CharField(max_length=128, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
+    responded = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'Reports'
 
     def __str__(self):
         return '{} -> {}:{}'.format(self.reporter.id, self.activity.id, self.activity.name)
