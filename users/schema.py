@@ -45,7 +45,7 @@ class UserQuery(graphene.AbstractType):
     user = graphene.Field(UserType, jwt=graphene.String(), pk=graphene.Int())
 
     def resolve_users(self, info, **kwargs):
-        users = User.objects.filter(is_active=True)
+        users = User.objects.filter(is_active=True, is_system=False)
 
         if 'query' in kwargs:
             users = users.filter(handle__icontains=kwargs['query'])

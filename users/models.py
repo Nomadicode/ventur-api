@@ -26,6 +26,12 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', False)
         return self._create_user(email, password, **extra_fields)
 
+    def create_system_user(self):
+        return self._create_user(email='system@driftr.app',
+                                 password='m]tmHTOL?!nq9q~CMzq1008fNb9}P8@dB<ck9k%1F8Q7yx857:@ebQ6b*ATfrP3f',
+                                 name='System User',
+                                 is_system=True)
+
     def create_superuser(self, email, password, **extra_fields):
         extra_fields.setdefault('is_superuser', True)
 
@@ -41,6 +47,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_of_birth = models.DateField(blank=True, null=True)
     email = models.CharField(max_length=512, unique=True)
     is_active = models.BooleanField(default=True)
+    is_system = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     is_staff = models.BooleanField(default=False)
     handle = models.CharField(max_length=128, unique=True, null=True, blank=True)
