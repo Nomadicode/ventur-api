@@ -96,6 +96,7 @@ class FriendQuery(object):
 
         # Remove self from results
         users = User.objects.all().exclude(id__in=(user.id,))
+        users.exclude(is_system=True)
 
         # Remove users that have been sent requests
         requests = FriendshipRequest.objects.filter(from_user__id=user.id)
@@ -141,6 +142,7 @@ class FriendQuery(object):
 
         # Remove self from results
         users = User.objects.all().exclude(id__in=(user.id,))
+        users = users.exclude(is_system=True)
 
         # Remove users that have been sent requests
         requests = FriendshipRequest.objects.filter(from_user__id=user.id)
