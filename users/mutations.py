@@ -4,7 +4,7 @@ from api.helpers import get_user_from_info, base64_to_file
 
 from allauth.account.models import EmailAddress
 from api.enums import Errors
-from .models import AccountDeleteRequest
+from .models import AccountDeleteRequest, UserSettings
 from .serializers import UserDetailsSerializer, UserSettingsSerializer
 from .schema import UserType, UserSettingsType
 
@@ -83,7 +83,7 @@ class UserSettingsUpdateMutation(graphene.Mutation):
 
 class RequestAccountDelete(graphene.Mutation):
     class Arguments:
-        pk = graphene.Int(required=True)
+        pk = graphene.ID(required=True)
 
     success = graphene.Boolean()
     error = graphene.String()

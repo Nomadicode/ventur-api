@@ -8,13 +8,18 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D
-from geopy import distance
 from django.db.models import Count
 from graphene_django.types import DjangoObjectType
 from api.helpers import get_user_from_info, get_distance
 
-from .models import Category, Activity, Location
+from .models import Category, Activity, Location, Schedule
 
+
+class ScheduleType(DjangoObjectType):
+    pk = graphene.Int()
+
+    class Meta:
+        model = Schedule
 
 class CategoryType(DjangoObjectType):
     pk = graphene.Int()
@@ -101,9 +106,6 @@ class ActivityQuery(object):
         if not user.is_authenticated:
             raise Exception('Authentication Error')
 
-        location = GEOSGeometry('POINT(%s %s)' % (kwargs['longitude'], kwargs['latitude']), srid=4326)
-        # distance = kwargs['radius'] if 'radius' in kwargs else settings.DEFAULT_RADIUS
-
         activities = Activity.objects.all()
 
         if 'created_by' in kwargs and kwargs['created_by']:
@@ -115,6 +117,7 @@ class ActivityQuery(object):
             # Remove if restricted to a group user is not a member of
 
             # Refine to my location
+            location = GEOSGeometry('POINT(%s %s)' % (kwargs['longitude'], kwargs['latitude']), srid=4326)
             distance = settings.DEFAULT_RADIUS
             if 'filters' in kwargs:
                 filters = json.loads(kwargs['filters'].replace("\'", "\"").replace('None', 'null'))
@@ -151,15 +154,15 @@ class ActivityQuery(object):
                     start_date = parser.parse(filters['startDate'])
                     end_date = parser.parse(filters['endDate'])
 
-                    activities = activities.for_period(from_date=start_date, to_date=end_date, exact=True)
+                    activities = activities.for_period(from_date=start_date, to_date=end_date)
 
                 if 'price' in filters and filters['price']:
                     activities = activities.filter(price__lte=filters['price'])
 
                 if 'duration' in filters and filters['duration']:
                     activities = activities.filter(duration__lte=filters['duration'])
-
-        activities = activities.sort_by_next()
+        #
+        # activities = activities.sort_by_next()
 
         page_size = 10
         start = 0
@@ -196,14 +199,11 @@ class ActivityQuery(object):
 
         # Remove user reported activities
         activity = activity.exclude(reports__reporter__id=user.id)
-        print(len(activity))
-        # Narrow to upcoming today
-        start_date = datetime.now()
-        end_date = datetime.now().replace(hour=23, minute=59, second=59)
-        print(start_date, end_date)
-        activity = activity.for_period(from_date=start_date, to_date=end_date, exact=True)
 
-        print(len(activity))
+        # Narrow to upcoming today
+        # start_date = datetime.now()
+        # end_date = datetime.now().replace(hour=23, minute=59, second=59)
+        # activity = activity.for_period(from_date=start_date, to_date=end_date, exact=True)
 
         activity = activity.order_by('?').first()
 

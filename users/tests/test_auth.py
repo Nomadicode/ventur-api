@@ -44,4 +44,12 @@ class UserAuthTest(TestCase):
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
     def test_password_recovery(self):
-        pass
+        url = reverse('rest_password_reset')
+
+        response = self.client.post(url, {
+            'email': self.email
+        })
+
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        result = response.json()
+        self.assertEquals(result['detail'], 'Password reset e-mail has been sent.')

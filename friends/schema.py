@@ -32,10 +32,10 @@ class FriendshipRequestType(DjangoObjectType):
 
 
 class FriendQuery(object):
-    friendships = graphene.List(UserType)
+    friendships = graphene.List(UserType, page=graphene.Int())
     sent_friend_requests = graphene.List(FriendshipRequestType)
     pending_friend_requests = graphene.List(FriendshipRequestType)
-    friend_groups = graphene.List(GroupType, query=graphene.String())
+    friend_groups = graphene.List(GroupType, query=graphene.String(), page=graphene.Int())
     blocked_users = graphene.List(UserType)
     search_users = graphene.List(UserType, query=graphene.String())
     friend_suggestions = graphene.List(UserType)
@@ -46,7 +46,17 @@ class FriendQuery(object):
         if not user.is_authenticated:
             raise Exception(Errors.AUTH)
 
-        return Friend.objects.friends(user)
+        friends = Friend.objects.friends(user)
+
+        page_size = 10
+        start = 0
+        end = page_size
+
+        if 'page' in kwargs:
+            start = (kwargs['page'] - 1) * page_size
+            end = start + page_size
+
+        return friends[start:end]
 
     def resolve_sent_friend_requests(self, info, **kwargs):
         user = get_user_from_info(info)
@@ -75,7 +85,15 @@ class FriendQuery(object):
         if 'query' in kwargs:
             groups = groups.filter(name__icontains=kwargs['query'])
 
-        return groups
+        page_size = 10
+        start = 0
+        end = page_size
+
+        if 'page' in kwargs:
+            start = (kwargs['page'] - 1) * page_size
+            end = start + page_size
+
+        return groups[start:end]
 
     def resolve_blocked_users(self, info, **kwargs):
         user = get_user_from_info(info)

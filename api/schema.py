@@ -26,6 +26,7 @@ class Mutations(graphene.ObjectType):
 
     # Activity Mutations
     add_activity = activity_mutations.ActivityAddMutation.Field()
+    update_activity = activity_mutations.ActivityUpdateMutation.Field()
     delete_activity = activity_mutations.ActivityDeleteMutation.Field()
 
     # Feedback Mutations

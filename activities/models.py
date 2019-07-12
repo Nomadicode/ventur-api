@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.gis.db import models as geomodels
 from django.contrib.gis.geos import Point
 from graphene_django.converter import convert_django_field
-# from recurrence.fields import RecurrenceField
+from recurrence.fields import RecurrenceField
 from eventtools.models import BaseEvent, BaseOccurrence
 
 
@@ -56,6 +56,7 @@ class Activity(BaseEvent):
     groups = models.ManyToManyField(Group, related_name='allowed_groups', blank=True)
     created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, related_name='creator', on_delete=models.CASCADE, null=True, blank=True)
+    # recurrence = RecurrenceField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'Activities'
@@ -65,8 +66,3 @@ class Activity(BaseEvent):
 
 class Schedule(BaseOccurrence):
     event = models.ForeignKey(Activity, related_name="schedule", on_delete=models.CASCADE)
-
-#
-# @convert_django_field.register(RecurrenceField)
-# def convert_field_to_object(field, registry=None):
-#     return None

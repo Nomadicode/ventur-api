@@ -4,24 +4,21 @@ from django.db import migrations
 from django.contrib.sites.models import Site
 
 def update_core_settings(apps, schema_editor):
-    site = Site.objects.first()
-
     env = environ.Env()
     config = env('DJANGO_CONFIGURATION')
 
-    if config == 'Local':
-        site.domain = 'http://localhost:8000'
-        site.name = 'Driftr Local'
+    domain = 'http://localhost:8000'
+    name = 'Driftr Local'
 
     if config == 'Dev':
-        site.domain = 'https://api-dev.driftr.app'
-        site.name = 'Driftr Dev'
+        domain = 'https://api-dev.driftr.app'
+        name = 'Driftr Dev'
 
     if config == 'Prod':
-        site.domain = 'https://api.driftr.app'
-        site.name = 'Driftr'
+        domain = 'https://api.driftr.app'
+        name = 'Driftr'
 
-    site.save()
+    Site.objects.create(domain=domain, name=name)
 
 
 class Migration(migrations.Migration):

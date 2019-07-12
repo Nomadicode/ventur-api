@@ -134,7 +134,7 @@ class FriendGroupAddMemberMutation(graphene.Mutation):
 class FriendGroupRemoveMemberMutation(graphene.Mutation):
     class Arguments:
         group_id = graphene.Int(required=True)
-        member_id = graphene.Int(required=True)
+        member_id = graphene.ID(required=True)
 
     success = graphene.Boolean()
     error = graphene.String()
