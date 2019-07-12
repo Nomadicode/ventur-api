@@ -60,7 +60,6 @@ class Base(Configuration):
         'rest_auth',
 
         'corsheaders',
-        'recurrence',
         'friendship',
 
         'users',

@@ -161,8 +161,8 @@ class ActivityQuery(object):
 
                 if 'duration' in filters and filters['duration']:
                     activities = activities.filter(duration__lte=filters['duration'])
-        #
-        # activities = activities.sort_by_next()
+
+        activities = activities.sort_by_next()
 
         page_size = 10
         start = 0
@@ -201,9 +201,9 @@ class ActivityQuery(object):
         activity = activity.exclude(reports__reporter__id=user.id)
 
         # Narrow to upcoming today
-        # start_date = datetime.now()
-        # end_date = datetime.now().replace(hour=23, minute=59, second=59)
-        # activity = activity.for_period(from_date=start_date, to_date=end_date, exact=True)
+        start_date = datetime.now()
+        end_date = datetime.now().replace(hour=23, minute=59, second=59)
+        activity = activity.for_period(from_date=start_date, to_date=end_date)
 
         activity = activity.order_by('?').first()
 
