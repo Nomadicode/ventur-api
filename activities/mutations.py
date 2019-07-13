@@ -123,8 +123,6 @@ class ActivityAddMutation(graphene.Mutation):
         if schedule:
             schedule.event = instance
             schedule.save()
-        # instance.recurrence = schedule
-        # instance.save()
 
         return ActivityAddMutation(success=True, error=None, activity=instance)
 
@@ -187,10 +185,13 @@ class ActivityUpdateMutation(graphene.Mutation):
         schedule = None
         if ('start_datetime' in kwargs and kwargs['start_datetime']) or (
                 'end_datetime' in kwargs and kwargs['end_datetime']):
-            schedule = Schedule.objects.get_or_create(
-                start=parser.parse(kwargs['start_datetime']),
-                end=parser.parse(kwargs['end_datetime'])
-            )
+            try:
+                schedule = Schedule.objects.get(event__id=kwargs['pk'])
+            except Schedule.DoesNotExist:
+                schedule = Schedule()
+
+            schedule.start = parser.parse(kwargs['start_datetime'])
+            schedule.end = parser.parse(kwargs['end_datetime'])
 
             if 'frequency' in kwargs and kwargs['frequency'] > -1:
                 frequency = REPEAT_CHOICES[kwargs['frequency']] if kwargs['frequency'] < 4 else None
@@ -241,8 +242,6 @@ class ActivityUpdateMutation(graphene.Mutation):
         if schedule:
             schedule.event = instance
             schedule.save()
-        # instance.recurrence = schedule
-        # instance.save()
 
         return ActivityUpdateMutation(success=True, error=None, activity=instance)
 

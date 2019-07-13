@@ -1,4 +1,5 @@
 import uuid
+from dateutil import parser
 from datetime import timedelta
 from django.utils import timezone
 
@@ -186,9 +187,16 @@ class ActivityGraphQLTest(GraphQLTestCase):
 
         query = '''
                 query Activities($createdBy: ID!) {
-                   activities (createdBy: $createdBy) {
-                       id
-                   }
+                    activities (createdBy: $createdBy) {
+                        pageInfo {
+                            hasNextPage
+                        }
+                        edges {
+                            node {
+                                id
+                            }
+                        }
+                    }
                 }
                 '''
 
@@ -203,8 +211,7 @@ class ActivityGraphQLTest(GraphQLTestCase):
                           })
 
         data = resp['data']
-
-        self.assertEqual(len(data['activities']), 1)
+        self.assertEqual(len(data['activities']['edges']), 1)
 
     def test_get_activities_with_filters(self):
         pass
@@ -316,47 +323,44 @@ class ActivityGraphQLTest(GraphQLTestCase):
         })
 
     def test_update_activity_schedule(self):
-        pass
-        # activity = self.generator.create_activity()
-        # query = '''
-        #             mutation UpdateActivity($pk: ID!, $name: String, $media: String, $description: String, $categories: String, $duration: Int, $price: Float, $minimumAge: Int, $maximumAge: Int,
-        #               $handicapFriendly: Boolean, $isNsfw: Boolean, $alcoholPresent: Boolean, $address: String, $latitude: Float, $longitude: Float, $startDatetime: String, $endDatetime: String,
-        #               $frequency: Int, $groups: String) {
-        #                 updateActivity(pk: $pk, name: $name, media: $media, description: $description, categories: $categories, duration: $duration, price: $price, minimumAge: $minimumAge, maximumAge: $maximumAge,
-        #                   handicapFriendly: $handicapFriendly, isNsfw: $isNsfw, alcoholPresent: $alcoholPresent, address: $address, latitude: $latitude, longitude: $longitude, startDatetime: $startDatetime,
-        #                   endDatetime: $endDatetime, frequency: $frequency, groups: $groups) {
-        #                 success
-        #                 error
-        #                 activity {
-        #                   name
-        #                 }
-        #               }
-        #             }
-        #         '''
-        #
-        # variables = {
-        #     'pk': str(activity.id),
-        #     'startDatetime': timezone.now().strftime('%Y-%m-%dT%H:%M%z'),
-        #     'endDatetime': (timezone.now() + timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M%z'),
-        #     'frequency': None
-        # }
-        #
-        # resp = self.query(query,
-        #                   op_name='updateActivity',
-        #                   input=variables,
-        #                   headers={
-        #                       'HTTP_AUTHORIZATION': 'JWT ' + self.user.get_jwt()
-        #                   })
-        #
-        # self.assertResponseNoErrors(resp, {
-        #     'updateActivity': {
-        #         'success': True,
-        #         'error': None,
-        #         'activity': {
-        #             'name': variables['name']
-        #         }
-        #     }
-        # })
+        activity = self.generator.create_activity(creator=self.user)
+        query = '''
+                    mutation UpdateActivity($pk: ID!, $name: String, $media: String, $description: String, $categories: String, $duration: Int, $price: Float, $minimumAge: Int, $maximumAge: Int,
+                      $handicapFriendly: Boolean, $isNsfw: Boolean, $alcoholPresent: Boolean, $address: String, $latitude: Float, $longitude: Float, $startDatetime: String, $endDatetime: String,
+                      $frequency: Int, $groups: String) {
+                        updateActivity(pk: $pk, name: $name, media: $media, description: $description, categories: $categories, duration: $duration, price: $price, minimumAge: $minimumAge, maximumAge: $maximumAge,
+                          handicapFriendly: $handicapFriendly, isNsfw: $isNsfw, alcoholPresent: $alcoholPresent, address: $address, latitude: $latitude, longitude: $longitude, startDatetime: $startDatetime,
+                          endDatetime: $endDatetime, frequency: $frequency, groups: $groups) {
+                            success
+                            error
+                            activity {
+                                schedule {
+                                    start
+                                    end
+                                }
+                            }
+                      }
+                    }
+                '''
+
+        variables = {
+            'pk': str(activity.id),
+            'startDatetime': timezone.now().strftime('%Y-%m-%dT%H:%M%z'),
+            'endDatetime': (timezone.now() + timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M%z'),
+            'frequency': None
+        }
+
+        resp = self.query(query,
+                          op_name='updateActivity',
+                          input=variables,
+                          headers={
+                              'HTTP_AUTHORIZATION': 'JWT ' + self.user.get_jwt()
+                          })
+
+        schedule = resp['data']['updateActivity']['activity']['schedule'][0]
+
+        self.assertEqual(parser.parse(schedule['start']), parser.parse(variables['startDatetime']))
+        self.assertEqual(parser.parse(schedule['end']), parser.parse(variables['endDatetime']))
 
     def test_delete_activity(self):
         activity = self.generator.create_activity(creator=self.user)

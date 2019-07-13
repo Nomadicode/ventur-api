@@ -1,14 +1,13 @@
 import graphene
 import json
-import pytz
 from dateutil import parser
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from django.utils import timezone
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D
 from django.db.models import Count
+from graphene import relay
 from graphene_django.types import DjangoObjectType
 from api.helpers import get_user_from_info, get_distance
 
@@ -78,6 +77,11 @@ class ActivityType(DjangoObjectType):
         return user.reported_activities.filter(activity_id=self.id).exists()
 
 
+class ActivityConnection(relay.Connection):
+    class Meta:
+        node = ActivityType
+
+
 class LocationType(DjangoObjectType):
     pk = graphene.Int()
 
@@ -88,8 +92,9 @@ class LocationType(DjangoObjectType):
 
 class ActivityQuery(object):
     activity = graphene.Field(ActivityType, pk=graphene.ID(required=True))
-    activities = graphene.List(ActivityType, latitude=graphene.Float(), longitude=graphene.Float(), saved=graphene.Boolean(),
-                               filters=graphene.String(), page=graphene.Int(), created_by=graphene.ID())
+    activities = relay.ConnectionField(ActivityConnection, latitude=graphene.Float(), longitude=graphene.Float(),
+                                       saved=graphene.Boolean(), filters=graphene.String(), page=graphene.Int(),
+                                       created_by=graphene.ID())
     categories = graphene.List(CategoryType)
     random_activity = graphene.Field(ActivityType, latitude=graphene.Float(), longitude=graphene.Float(),
                                      radius=graphene.Int(), price=graphene.Int())
@@ -164,15 +169,7 @@ class ActivityQuery(object):
 
         activities = activities.sort_by_next()
 
-        page_size = 10
-        start = 0
-        end = page_size
-
-        if 'page' in kwargs:
-            start = (kwargs['page'] - 1) * page_size
-            end = start + page_size
-
-        return activities[start:end]
+        return activities
 
     def resolve_categories(self, info, **kwargs):
         return Category.objects.all()
