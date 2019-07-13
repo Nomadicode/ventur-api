@@ -199,13 +199,33 @@ class ActivityQuery(object):
         # Refine to location
         activity = Activity.objects.filter(location__point__distance_lte=(location, D(mi=distance)))
 
-        # Refine by price if set
-
         # Remove reported activities with > 3 reports
         activity = activity.annotate(report_count=Count('reports')).filter(report_count__lt=3)
 
         # Remove user reported activities
         activity = activity.exclude(reports__reporter__id=user.id)
+
+        # region Handle groups
+        groups_creator = list(user.friend_groups.all())
+        groups_member = list(user.group_memberships.all())
+        groups = [group.id for group in (groups_creator + groups_member)]
+
+        activity = activity.filter(Q(groups__isnull=True) |
+                                   Q(groups__id__in=groups))
+        # endregion
+
+        # Handle User Preferences
+        user_settings = user.settings.first()
+
+        if user_settings:
+            if user_settings.handicap_only:
+                activity = activity.filter(handicap_friendly=True)
+
+            if not user_settings.show_nsfw:
+                activity = activity.filter(is_nsfw=False)
+
+            if not user_settings.show_alcohol:
+                activity = activity.filter(alcohol_present=False)
 
         # Narrow to upcoming today
         start_date = datetime.now()
