@@ -1,11 +1,12 @@
 import graphene
 from django.db.models import Q
+from graphene import relay
 from graphene_django.types import DjangoObjectType
 from api.helpers import get_user_from_info, get_distance
 
 from api.enums import Errors
 from users.models import User
-from users.schema import UserType
+from users.schema import UserType, UserConnection
 from .models import Group
 from friendship.models import Friend, FriendshipRequest, Block
 
@@ -24,6 +25,16 @@ class GroupType(DjangoObjectType):
         model = Group
 
 
+class FriendshipConnection(relay.Connection):
+    class Meta:
+        node = FriendshipType
+
+
+class GroupConnection(relay.Connection):
+    class Meta:
+        node = GroupType
+
+
 class FriendshipRequestType(DjangoObjectType):
     pk = graphene.ID()
 
@@ -32,10 +43,11 @@ class FriendshipRequestType(DjangoObjectType):
 
 
 class FriendQuery(object):
-    friendships = graphene.List(UserType, page=graphene.Int())
+    friendships = relay.ConnectionField(UserConnection)
     sent_friend_requests = graphene.List(FriendshipRequestType)
     pending_friend_requests = graphene.List(FriendshipRequestType)
-    friend_groups = graphene.List(GroupType, query=graphene.String(), page=graphene.Int())
+    friend_groups = graphene.List(GroupType)
+    friend_groups_paged = relay.ConnectionField(GroupConnection, query=graphene.String())
     blocked_users = graphene.List(UserType)
     search_users = graphene.List(UserType, query=graphene.String())
     friend_suggestions = graphene.List(UserType)
@@ -48,15 +60,7 @@ class FriendQuery(object):
 
         friends = Friend.objects.friends(user)
 
-        page_size = 10
-        start = 0
-        end = page_size
-
-        if 'page' in kwargs:
-            start = (kwargs['page'] - 1) * page_size
-            end = start + page_size
-
-        return friends[start:end]
+        return friends
 
     def resolve_sent_friend_requests(self, info, **kwargs):
         user = get_user_from_info(info)
@@ -74,7 +78,7 @@ class FriendQuery(object):
 
         return FriendshipRequest.objects.filter(to_user=user, rejected__isnull=True)
 
-    def resolve_friend_groups(self, info, **kwargs):
+    def resolve_friend_groups_paged(self, info, **kwargs):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
@@ -85,15 +89,15 @@ class FriendQuery(object):
         if 'query' in kwargs:
             groups = groups.filter(name__icontains=kwargs['query'])
 
-        page_size = 10
-        start = 0
-        end = page_size
+        return groups
 
-        if 'page' in kwargs:
-            start = (kwargs['page'] - 1) * page_size
-            end = start + page_size
+    def resolve_friend_groups(self, info, **kwargs):
+        user = get_user_from_info(info)
 
-        return groups[start:end]
+        if not user.is_authenticated:
+            raise Exception(Errors.AUTH)
+
+        return Group.objects.filter(creator=user)
 
     def resolve_blocked_users(self, info, **kwargs):
         user = get_user_from_info(info)

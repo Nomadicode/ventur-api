@@ -3,6 +3,7 @@ import graphene
 from django.conf import settings
 from api.helpers import get_user_from_info
 
+from graphene import relay
 from graphene_django.types import DjangoObjectType
 from graphene_django import DjangoConnectionField
 
@@ -40,8 +41,13 @@ class UserType(DjangoObjectType):
         return self.settings.first()
 
 
+class UserConnection(relay.Connection):
+    class Meta:
+        node = UserType
+
+
 class UserQuery(graphene.AbstractType):
-    users = graphene.List(UserType, query=graphene.String())
+    users = relay.ConnectionField(UserConnection, query=graphene.String())
     user = graphene.Field(UserType, jwt=graphene.String(), pk=graphene.Int())
 
     def resolve_users(self, info, **kwargs):

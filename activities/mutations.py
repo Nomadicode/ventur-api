@@ -193,7 +193,7 @@ class ActivityUpdateMutation(graphene.Mutation):
             schedule.start = parser.parse(kwargs['start_datetime'])
             schedule.end = parser.parse(kwargs['end_datetime'])
 
-            if 'frequency' in kwargs and kwargs['frequency'] > -1:
+            if 'frequency' in kwargs and kwargs['frequency'] and kwargs['frequency'] > -1:
                 frequency = REPEAT_CHOICES[kwargs['frequency']] if kwargs['frequency'] < 4 else None
 
                 if frequency:

@@ -3,6 +3,7 @@ import json
 from dateutil import parser
 from datetime import datetime
 
+from django.db.models import Q
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D
@@ -138,6 +139,15 @@ class ActivityQuery(object):
             # Remove activities reported by requesting user
             activities = activities.exclude(reports__reporter__id=user.id)
 
+            #region Handle groups
+            groups_creator = list(user.friend_groups.all())
+            groups_member = list(user.group_memberships.all())
+            groups = [group.id for group in (groups_creator + groups_member)]
+
+            activities = activities.filter(Q(groups__isnull=True) |
+                                           Q(groups__id__in=groups))
+            #endregion
+
             # Handle User Preferences
             user_settings = user.settings.first()
 
@@ -161,11 +171,11 @@ class ActivityQuery(object):
 
                     activities = activities.for_period(from_date=start_date, to_date=end_date)
 
-                if 'price' in filters and filters['price']:
-                    activities = activities.filter(price__lte=filters['price'])
+                if 'price' in filters and filters['price'] is not None:
+                    activities = activities.filter(Q(price__lte=filters['price']) | Q(price__isnull=True))
 
-                if 'duration' in filters and filters['duration']:
-                    activities = activities.filter(duration__lte=filters['duration'])
+                if 'duration' in filters and filters['duration'] is not None:
+                    activities = activities.filter(Q(duration__lte=filters['duration']) | Q(duration__isnull=True))
 
         activities = activities.sort_by_next()
 
