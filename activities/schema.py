@@ -46,17 +46,10 @@ class ActivityType(DjangoObjectType):
     def resolve_next_occurrence(self, info, **kwargs):
         next_occurrence = self.next_occurrence()
 
-        if 'filters' in kwargs and kwargs['filters']:
-            filters = json.loads(kwargs['filters'].replace("\'", "\"").replace('None', 'null'))
+        if not next_occurrence:
+            next_occurrence = self.first_occurrence()
 
-            if 'startDate' in kwargs and kwargs['startDate']:
-                start = parser.parse(kwargs['startDate'])
-                next_occurrence = self.next_occurrence(from_date=start)
-
-        if next_occurrence:
-            return next_occurrence[0]
-
-        return None
+        return next_occurrence[0] if next_occurrence else None
 
     def resolve_distance(self, info, **kwargs):
         user = get_user_from_info(info)
