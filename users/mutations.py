@@ -4,9 +4,9 @@ from api.helpers import get_user_from_info, base64_to_file
 
 from allauth.account.models import EmailAddress
 from api.enums import Errors
-from .models import AccountDeleteRequest, UserSettings
+from .models import AccountDeleteRequest, UserSettings, UserDevice
 from .serializers import UserDetailsSerializer, UserSettingsSerializer
-from .schema import UserType, UserSettingsType
+from .schema import UserType, UserSettingsType, UserDeviceType
 
 
 class UserUpdateMutation(graphene.Mutation):
@@ -97,3 +97,25 @@ class RequestAccountDelete(graphene.Mutation):
         AccountDeleteRequest.objects.create(user=user)
 
         return RequestAccountDelete(success=True, error=None)
+
+
+class UserDeviceAdd(graphene.Mutation):
+    class Arguments:
+        device_id = graphene.String(required=True)
+        device_type = graphene.String(required=True)
+
+    success = graphene.Boolean()
+    error = graphene.String()
+    user_device = graphene.Field(UserDeviceType)
+
+    def mutate(self, info, *args, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return UserDeviceAdd(success=False, error=Errors.AUTH)
+
+        user_device = UserDevice.objects.create(user=user,
+                                                device_id=kwargs['device_id'],
+                                                device_type=kwargs['device_type'])
+
+        return UserDeviceAdd(success=True, error=None, user_device=user_device)

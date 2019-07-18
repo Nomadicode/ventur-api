@@ -111,6 +111,13 @@ class UserSettings(models.Model):
     upcoming_saved_event_notification = models.BooleanField(default=True)
 
 
+class UserDevice(models.Model):
+    user = models.ForeignKey(User, related_name='devices', on_delete=models.CASCADE)
+    device_id = models.CharField(max_length=128)
+    device_type = models.CharField(max_length=64)
+    created = models.DateTimeField(auto_now_add=True)
+
+
 class AccountDeleteRequest(models.Model):
     user = models.OneToOneField(User, related_name="delete_request", on_delete=models.CASCADE, unique=True)
     request_date = models.DateTimeField(auto_now_add=True)

@@ -7,13 +7,20 @@ from graphene import relay
 from graphene_django.types import DjangoObjectType
 from graphene_django import DjangoConnectionField
 
-from .models import User, UserSettings
+from .models import User, UserSettings, UserDevice
 
 class UserSettingsType(DjangoObjectType):
     pk = graphene.Int()
 
     class Meta:
         model = UserSettings
+
+
+class UserDeviceType(DjangoObjectType):
+    pk = graphene.Int()
+
+    class Meta:
+        model = UserDevice
 
 
 class UserType(DjangoObjectType):
