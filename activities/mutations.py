@@ -34,6 +34,7 @@ class ActivityAddMutation(graphene.Mutation):
         start_datetime = graphene.String(required=False)
         end_datetime = graphene.String(required=False)
         frequency = graphene.Int(required=False)
+        repeat_until = graphene.String(required=False)
         groups = graphene.String(required=False)
 
     success = graphene.Boolean()
@@ -77,6 +78,10 @@ class ActivityAddMutation(graphene.Mutation):
 
                 if frequency:
                     schedule.repeat = 'RRULE:FREQ=' + frequency
+                    
+                if 'repeat_until' in kwargs and kwargs['repeat_until']:
+                    schedule.repeat_until = parser.parse(kwargs['repeat_until'])
+
         # endregion
 
         # region Set up location
