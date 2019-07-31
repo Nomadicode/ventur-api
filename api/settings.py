@@ -284,7 +284,7 @@ class Dev(Base):
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
 
-    ALLOWED_HOSTS = ['api-dev.driftr.app', '149.28.92.216']
+    ALLOWED_HOSTS = ['api-dev.driftr.app', 'api-dev.ventur.app', '149.28.92.216']
 
     DATABASES = {
         'default': {
@@ -310,7 +310,7 @@ class Dev(Base):
 class Prod(Base):
     DEBUG = False
 
-    ALLOWED_HOSTS = ['api.driftr.app', '207.246.103.228']
+    ALLOWED_HOSTS = ['api.driftr.app', 'api.ventur.app', '207.246.103.228']
 
     DATABASES = {
         'default': {
