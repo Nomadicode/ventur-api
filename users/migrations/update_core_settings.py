@@ -8,15 +8,15 @@ def update_core_settings(apps, schema_editor):
     config = env('DJANGO_CONFIGURATION')
 
     domain = 'http://localhost:8000'
-    name = 'Driftr Local'
+    name = 'Ventür Local'
 
     if config == 'Dev':
-        domain = 'https://api-dev.driftr.app'
-        name = 'Driftr Dev'
+        domain = 'https://api-dev.ventur.app'
+        name = 'Ventür Dev'
 
     if config == 'Prod':
-        domain = 'https://api.driftr.app'
-        name = 'Driftr'
+        domain = 'https://api.ventur.app'
+        name = 'Ventür'
 
     Site.objects.create(domain=domain, name=name)
 
