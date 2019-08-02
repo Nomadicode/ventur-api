@@ -26,13 +26,15 @@ from rest_auth.views import (
 )
 
 from users.social_views import FacebookLogin
+from users.views import AdminLoginView
 from graphene_django.views import GraphQLView
 
 urlpatterns = [
     re_path('^', include('django.contrib.auth.urls')),
-    re_path('^admin/?', admin.site.urls),
+    re_path('^d-admin/?', admin.site.urls),
     re_path('^auth/register/?', include(('rest_auth.registration.urls', 'users'), namespace='users'), name="register"),
     re_path('^auth/', include('rest_auth.urls')),
+    re_path('^auth/admin/login/', AdminLoginView.as_view(), name='admin_login'),
     re_path('^accounts/', include('allauth.urls')),
 
     re_path('^auth/facebook', FacebookLogin.as_view(), name="fb_login"),

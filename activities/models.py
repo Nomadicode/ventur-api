@@ -4,7 +4,6 @@ from django.db import models
 from django.contrib.gis.db import models as geomodels
 from django.contrib.gis.geos import Point
 from graphene_django.converter import convert_django_field
-from recurrence.fields import RecurrenceField
 from scheduling.models import BaseEvent, BaseOccurrence
 
 

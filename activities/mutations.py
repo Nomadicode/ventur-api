@@ -78,7 +78,7 @@ class ActivityAddMutation(graphene.Mutation):
 
                 if frequency:
                     schedule.repeat = 'RRULE:FREQ=' + frequency
-                    
+
                 if 'repeat_until' in kwargs and kwargs['repeat_until']:
                     schedule.repeat_until = parser.parse(kwargs['repeat_until'])
 

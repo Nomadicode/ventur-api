@@ -7,7 +7,7 @@ import scheduling.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('activities', '0004_remove_activity_recurrence'),
+        ('activities', '0002_auto_20190708_0100'),
     ]
 
     operations = [
