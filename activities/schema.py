@@ -93,9 +93,8 @@ class LocationType(DjangoObjectType):
 
 class ActivityQuery(object):
     activity = graphene.Field(ActivityType, pk=graphene.ID(required=True))
-    activities = relay.ConnectionField(ActivityConnection, latitude=graphene.Float(), longitude=graphene.Float(),
-                                       saved=graphene.Boolean(), filters=graphene.String(), page=graphene.Int(),
-                                       created_by=graphene.ID())
+    activities = relay.ConnectionField(ActivityConnection, fetch_all=graphene.Boolean(), latitude=graphene.Float(), longitude=graphene.Float(),
+                                       saved=graphene.Boolean(), filters=graphene.String(), created_by=graphene.ID())
     categories = graphene.List(CategoryType)
     random_activity = graphene.Field(ActivityType, latitude=graphene.Float(), longitude=graphene.Float(),
                                      radius=graphene.Int(), price=graphene.Int())
@@ -113,6 +112,9 @@ class ActivityQuery(object):
             raise Exception('Authentication Error')
 
         activities = Activity.objects.all()
+
+        if 'fetch_all' in kwargs and user.is_staff:
+            return activities
 
         if 'created_by' in kwargs and kwargs['created_by']:
             activities = activities.filter(created_by__id=kwargs['created_by'])
