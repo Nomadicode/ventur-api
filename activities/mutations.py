@@ -10,6 +10,8 @@ from api.helpers import get_user_from_info, get_address_from_latlng, get_latlng_
 
 from friends.models import Group
 
+from users.models import User
+
 from .models import Activity, Category, Location, Schedule, REPEAT_CHOICES
 from .serializers import ActivitySerializer
 from .schema import ActivityType
@@ -36,6 +38,7 @@ class ActivityAddMutation(graphene.Mutation):
         frequency = graphene.Int(required=False)
         repeat_until = graphene.String(required=False)
         groups = graphene.String(required=False)
+        system = graphene.Boolean(required=False)
 
     success = graphene.Boolean()
     error = graphene.String()
@@ -48,7 +51,11 @@ class ActivityAddMutation(graphene.Mutation):
             return ActivityAddMutation(success=False, error="You must be logged in to add an activity.",
                                        activity=None)
 
-        kwargs['created_by'] = user.id
+        if 'system' in kwargs and kwargs['system']:
+            system_user = User.objects.filter(is_system=True)[0]
+            kwargs['created_by'] = system_user.id
+        else:
+            kwargs['created_by'] = user.id
 
         if 'categories' in kwargs:
             categories = kwargs['categories'].split(',')
@@ -265,9 +272,12 @@ class ActivityDeleteMutation(graphene.Mutation):
             return ActivityDeleteMutation(success=False, error="You must be logged in to delete an activity")
 
         try:
-            activity = Activity.objects.get(id=kwargs['pk'], created_by__id=user.id)
+            activity = Activity.objects.get(id=kwargs['pk'])
         except Activity.DoesNotExist:
-            return ActivityDeleteMutation(success=False, error="Unable to delete activity")
+            return ActivityDeleteMutation(success=False, error="Unable to find activity")
+
+        if activity.created_by.id != user.id and not user.is_staff:
+            return ActivityDeleteMutation(success=False, error="Permission denied")
 
         schedule = Schedule.objects.filter(event=activity).delete()
 
