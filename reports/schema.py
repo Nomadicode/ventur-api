@@ -26,10 +26,21 @@ class ReportType(DjangoObjectType):
 
 class ReportQuery(object):
     report_categories = graphene.List(ReportCategoryType)
-    reports = graphene.List(ReportType)
+    reports = graphene.List(ReportType, resolved=graphene.Boolean(required=False), all=graphene.Boolean(required=False))
 
     def resolve_report_categories(self, info, **kwargs):
         return ReportCategory.objects.all()
 
     def resolve_reports(self, info, **kwargs):
-        return Report.objects.all()
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated or not user.is_staff:
+            raise Exception('Permission Error: User lacks sufficient permissions to view reports')
+
+        if 'all' in kwargs and kwargs['all']:
+            return Report.objects.all()
+
+        if 'resolved' in kwargs and kwargs['resolved']:
+            return Report.objects.filter(resolved=True)
+
+        return Report.objects.filter(resolved=False)

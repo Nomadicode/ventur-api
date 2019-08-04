@@ -2,7 +2,7 @@ import graphene
 
 from api.helpers import get_user_from_info
 
-from activities.models import Activity
+from activities.models import Activity, Schedule
 
 from .models import Report, ReportCategory
 from .serializers import ReportSerializer
@@ -50,3 +50,46 @@ class ReportActivityMutation(graphene.Mutation):
 
         instance = serializer.save()
         return ReportActivityMutation(success=True, error=None, report=instance)
+
+
+class ResolveReportMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.Int(required=True)
+        uphold = graphene.Boolean(required=True)
+
+    success = graphene.Boolean()
+    error = graphene.String()
+
+    def mutate(self, info, *args, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return ResolveReportMutation(success=False, error="You must be logged in as an admin to resolve activities")
+
+        if not user.is_staff:
+            return ResolveReportMutation(success=False, error="Permission Error: User lacks permission to resolve")
+
+        try:
+            report = Report.objects.get(id=kwargs['id'])
+        except Report.DoesNotExist:
+            return ResolveReportMutation(success=False, error="Unable to find requested report")
+
+        if kwargs['uphold']:
+            try:
+                activity = Activity.objects.get(id=report.activity.id)
+            except Activity.DoesNotExist:
+                return ResolveReportMutation(success=False, error="Unable to find activity to reject")
+
+            schedule = Schedule.objects.filter(event=activity).delete()
+            activity.delete()
+
+            report.upheld = True
+            report.resolved = True
+            report.save()
+
+            return ResolveReportMutation(success=True, error=None)
+        else:
+            report.resolved = True
+            report.save()
+
+            return ResolveReportMutation(success=True, error=None)

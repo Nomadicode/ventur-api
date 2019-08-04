@@ -23,7 +23,8 @@ class Report(models.Model):
     category = models.ForeignKey(ReportCategory, related_name='reason', on_delete=models.DO_NOTHING)
     detail = models.CharField(max_length=128, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
-    responded = models.BooleanField(default=False)
+    upheld = models.BooleanField(default=False)
+    resolved = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = 'Reports'
