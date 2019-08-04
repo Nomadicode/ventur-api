@@ -7,7 +7,13 @@ from graphene import relay
 from graphene_django.types import DjangoObjectType
 from graphene_django import DjangoConnectionField
 
-from .models import User, UserSettings, UserDevice
+from .models import User, UserSettings, UserDevice, AccountDeleteRequest
+
+class AccountDeleteRequestType(DjangoObjectType):
+    pk = graphene.Int()
+
+    class Meta:
+        model = AccountDeleteRequest
 
 class UserSettingsType(DjangoObjectType):
     pk = graphene.Int()
@@ -55,7 +61,7 @@ class UserConnection(relay.Connection):
 
 class UserQuery(graphene.AbstractType):
     users = relay.ConnectionField(UserConnection, fetch_all=graphene.Boolean(), query=graphene.String())
-    user = graphene.Field(UserType, jwt=graphene.String(), pk=graphene.Int())
+    user = graphene.Field(UserType, jwt=graphene.String(), pk=graphene.ID())
 
     def resolve_users(self, info, **kwargs):
         user = get_user_from_info(info)

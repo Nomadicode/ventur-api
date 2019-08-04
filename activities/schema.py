@@ -122,8 +122,6 @@ class ActivityQuery(object):
             if 'saved' in kwargs and kwargs['saved']:
                 activities = activities.filter(saved_activities__user__id=user.id)
 
-            # Remove if restricted to a group user is not a member of
-
             # Refine to my location
             location = GEOSGeometry('POINT(%s %s)' % (kwargs['longitude'], kwargs['latitude']), srid=4326)
             distance = settings.DEFAULT_RADIUS
@@ -136,7 +134,7 @@ class ActivityQuery(object):
             activities = activities.filter(location__point__distance_lte=(location, D(mi=distance)))
 
             # Remove activities with > 3 reports
-            activities = activities.annotate(report_count=Count('reports')).filter(report_count__lt=3)
+            activities = activities.annotate(report_count=Count('reports')).filter(report_count__lt=3, reports__upheld=False)
 
             # Remove activities reported by requesting user
             activities = activities.exclude(reports__reporter__id=user.id)
@@ -202,7 +200,7 @@ class ActivityQuery(object):
         activity = Activity.objects.filter(location__point__distance_lte=(location, D(mi=distance)))
 
         # Remove reported activities with > 3 reports
-        activity = activity.annotate(report_count=Count('reports')).filter(report_count__lt=3)
+        activity = activity.annotate(report_count=Count('reports')).filter(report_count__lt=3, reports__upheld=False)
 
         # Remove user reported activities
         activity = activity.exclude(reports__reporter__id=user.id)
