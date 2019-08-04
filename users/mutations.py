@@ -2,6 +2,8 @@ import graphene
 
 from api.helpers import get_user_from_info, base64_to_file
 
+from django.db import IntegrityError
+
 from allauth.account.models import EmailAddress
 from api.enums import Errors
 from .models import AccountDeleteRequest, UserSettings, UserDevice
@@ -94,9 +96,7 @@ class RequestAccountDelete(graphene.Mutation):
         if not user.is_authenticated:
             return RequestAccountDelete(success=False, error=Errors.AUTH)
 
-        user.delete()
-
-        # AccountDeleteRequest.objects.create(user=user)
+        AccountDeleteRequest.objects.create(user=user)
 
         return RequestAccountDelete(success=True, error=None)
 
