@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from dateutil import parser
 import graphene
-import recurrence
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.db import IntegrityError

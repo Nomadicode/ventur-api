@@ -94,7 +94,9 @@ class RequestAccountDelete(graphene.Mutation):
         if not user.is_authenticated:
             return RequestAccountDelete(success=False, error=Errors.AUTH)
 
-        AccountDeleteRequest.objects.create(user=user)
+        user.delete()
+
+        # AccountDeleteRequest.objects.create(user=user)
 
         return RequestAccountDelete(success=True, error=None)
 
