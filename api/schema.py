@@ -34,6 +34,7 @@ class Mutations(graphene.ObjectType):
 
     # Report Mutations
     submit_report = report_mutations.ReportActivityMutation.Field()
+    resolve_report = report_mutations.ResolveReportMutation.Field()
 
     # Preference Mutations
     reject_activity = preference_mutations.RejectActivityMutation.Field()
