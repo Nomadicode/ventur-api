@@ -134,7 +134,7 @@ class ActivityQuery(object):
             activities = activities.filter(location__point__distance_lte=(location, D(mi=distance)))
 
             # Remove activities with > 3 reports
-            activities = activities.annotate(report_count=Count('reports')).filter(report_count__lt=3, reports__upheld=False)
+            activities = activities.annotate(report_count=Count('reports')).filter(report_count__lt=3)
 
             # Remove activities reported by requesting user
             activities = activities.exclude(reports__reporter__id=user.id)
