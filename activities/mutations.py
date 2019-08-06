@@ -30,6 +30,7 @@ class ActivityAddMutation(graphene.Mutation):
         is_nsfw = graphene.Boolean(required=False)
         alcohol_present = graphene.Boolean(required=False)
         address = graphene.String(required=False)
+        location_name = graphene.String(required=False)
         latitude = graphene.Float(required=False)
         longitude = graphene.Float(required=False)
         start_datetime = graphene.String(required=False)
@@ -68,9 +69,6 @@ class ActivityAddMutation(graphene.Mutation):
 
             kwargs['categories'] = category_arr
 
-        if 'media' in kwargs:
-            kwargs['media'] = base64_to_file(kwargs['media'])
-
         # region Set up schedule
         schedule = None
         if ('start_datetime' in kwargs and kwargs['start_datetime']) or ('end_datetime' in kwargs and kwargs['end_datetime']):
@@ -93,15 +91,16 @@ class ActivityAddMutation(graphene.Mutation):
         # region Set up location
         if (('longitude' in kwargs and kwargs['longitude']) and ('latitude' in kwargs and kwargs['latitude'])) or ('address' in kwargs and kwargs['address']):
             location_data = {
+                'name': kwargs['location_name'] if 'location_name' in kwargs else None,
                 'address': kwargs['address'] if 'address' in kwargs else None,
                 'latitude': kwargs['latitude'] if 'latitude' in kwargs else None,
                 'longitude': kwargs['longitude'] if 'longitude' in kwargs else None,
                 'point': None
             }
 
-            if 'latitude' in kwargs and 'longitude' in kwargs:
-                location_data['address'] = get_address_from_latlng(kwargs['latitude'], kwargs['longitude'])
-            elif 'address' in kwargs:
+            if ('latitude' in kwargs and 'longitude' in kwargs) and 'address' not in kwargs:
+                location_data['name'], location_data['address'] = get_address_from_latlng(kwargs['latitude'], kwargs['longitude'])
+            elif 'address' in kwargs and ('longitude' not in kwargs or 'latitude' not in kwargs):
                 location_data['latitude'], location_data['longitude'] = get_latlng_from_address(location_str=kwargs['address'])
 
             location_data['point'] = GEOSGeometry('POINT(%s %s)' % (location_data['longitude'], location_data['latitude']), srid=4326)

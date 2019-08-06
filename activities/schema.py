@@ -32,16 +32,10 @@ class ActivityType(DjangoObjectType):
     pk = graphene.ID()
     next_occurrence = graphene.DateTime()
     distance = graphene.String()
-    media = graphene.String()
     saved = graphene.Boolean()
 
     class Meta:
         model = Activity
-
-    def resolve_media(self, info, **kwargs):
-        if self.media:
-            return settings.SITE_DOMAIN + self.media.url
-        return None
 
     def resolve_next_occurrence(self, info, **kwargs):
         next_occurrence = self.next_occurrence()

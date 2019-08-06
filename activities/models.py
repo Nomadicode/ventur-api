@@ -41,7 +41,7 @@ class Location(models.Model):
 class Activity(BaseEvent):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     name = models.CharField(max_length=256)
-    media = models.FileField(upload_to='activities', blank=True, null=True)
+    media = models.CharField(max_length=256, blank=True, null=True)
     description = models.TextField(null=True, blank=True)
     categories = models.ManyToManyField(Category, related_name='categories', blank=True)
     location = models.ForeignKey(Location, related_name='location', on_delete=models.DO_NOTHING)

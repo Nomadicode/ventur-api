@@ -29,15 +29,17 @@ def base64_to_file(encoded_str):
     return ContentFile(file_contents, name=file_name)
 
 def get_address_from_latlng(latitude, longitude):
+    gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
+    gmaps.
     geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY, timeout=10)
     if latitude and longitude:
-        location = geolocator.reverse(str(latitude) + ", " + str(longitude), exactly_one=True)
-        return location.address
+        location = geolocator.reverse(str(latitude) + ", " + str(longitude), sensor=True, exactly_one=True)
+        return location.name, location.address
 
     return None
 
 def get_latlng_from_address(address=None, city=None, state=None, location_str=None):
-    geolocator = Nominatim(user_agent="driftr-app", timeout=10)
+    geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY, timeout=10)
     if address and city and state:
         location = geolocator.geocode(address + " " + city + ", " + state.abbreviation)
         return location.latitude, location.longitude
