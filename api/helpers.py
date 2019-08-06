@@ -29,8 +29,6 @@ def base64_to_file(encoded_str):
     return ContentFile(file_contents, name=file_name)
 
 def get_address_from_latlng(latitude, longitude):
-    gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
-    gmaps.
     geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY, timeout=10)
     if latitude and longitude:
         location = geolocator.reverse(str(latitude) + ", " + str(longitude), sensor=True, exactly_one=True)
