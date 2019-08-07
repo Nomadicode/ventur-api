@@ -9,7 +9,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D
 from django.db.models import Count
 from graphene import relay
-from graphene_django.types import DjangoObjectType
+from graphene_django.types import ObjectType, DjangoObjectType
 from api.helpers import get_user_from_info, get_distance
 
 from .models import Category, Activity, Location, Schedule
@@ -27,15 +27,30 @@ class CategoryType(DjangoObjectType):
     class Meta:
         model = Category
 
+class ActivityDateType(ObjectType):
+    start_date = graphene.DateTime()
+    end_date = graphene.DateTime()
 
 class ActivityType(DjangoObjectType):
     pk = graphene.ID()
-    next_occurrence = graphene.DateTime()
+    upcoming_dates = graphene.List(ActivityDateType)
+    next_occurrence = graphene.Field(ActivityDateType)
     distance = graphene.String()
     saved = graphene.Boolean()
 
     class Meta:
         model = Activity
+
+    def resolve_upcoming_dates(self, info, **kwargs):
+        upcoming_dates = []
+
+        for date in self.all_occurrences():
+            upcoming_dates.append(ActivityDateType(
+                start_date=date[0],
+                end_date=date[1]
+            ))
+
+        return upcoming_dates
 
     def resolve_next_occurrence(self, info, **kwargs):
         next_occurrence = self.next_occurrence()
@@ -43,7 +58,7 @@ class ActivityType(DjangoObjectType):
         if not next_occurrence:
             next_occurrence = self.first_occurrence()
 
-        return next_occurrence[0] if next_occurrence else None
+        return ActivityDateType(start_date=next_occurrence[0], end_date=next_occurrence[1])
 
     def resolve_distance(self, info, **kwargs):
         user = get_user_from_info(info)
