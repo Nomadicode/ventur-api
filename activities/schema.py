@@ -44,11 +44,17 @@ class ActivityType(DjangoObjectType):
     def resolve_upcoming_dates(self, info, **kwargs):
         upcoming_dates = []
 
+        count = 0
         for date in self.all_occurrences():
+            if count > 7:
+                break
+
             upcoming_dates.append(ActivityDateType(
                 start_date=date[0],
                 end_date=date[1]
             ))
+
+            count += 1
 
         return upcoming_dates
 
