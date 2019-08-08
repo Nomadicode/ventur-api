@@ -111,10 +111,10 @@ class UserDeviceAddMutation(graphene.Mutation):
         user = get_user_from_info(info)
 
         if not user.is_authenticated:
-            return UserDeviceAdd(success=False, error=Errors.AUTH)
+            return UserDeviceAddMutation(success=False, error=Errors.AUTH)
 
-        user_device = UserDevice.objects.create(user=user,
+        user_device, created = UserDevice.objects.get_or_create(user=user,
                                                 device_id=kwargs['device_id'],
                                                 device_type=kwargs['device_type'])
 
-        return UserDeviceAdd(success=True, error=None, user_device=user_device)
+        return UserDeviceAddMutation(success=True, error=None, user_device=user_device)
