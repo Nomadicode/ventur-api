@@ -31,17 +31,11 @@ class UserDeviceType(DjangoObjectType):
 
 class UserType(DjangoObjectType):
     pk = graphene.Int()
-    profile_picture = graphene.String()
     settings = graphene.Field(UserSettingsType)
 
     class Meta:
         model = User
         exclude_fields = ('password',)
-
-    def resolve_profile_picture(self, info, **kwargs):
-        if self.profile_picture:
-            return settings.SITE_DOMAIN + self.profile_picture.url
-        return None
 
     def resolve_settings(self, info, **kwargs):
         user = get_user_from_info(info)

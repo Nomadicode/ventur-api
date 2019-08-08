@@ -51,7 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     created = models.DateTimeField(auto_now_add=True)
     is_staff = models.BooleanField(default=False)
     handle = models.CharField(max_length=128, unique=True, null=True, blank=True)
-    profile_picture = models.FileField(upload_to='profile_pictures', null=True, blank=True)
+    profile_picture = models.CharField(max_length=256, null=True, blank=True)
     timezone = models.CharField(max_length=128, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)

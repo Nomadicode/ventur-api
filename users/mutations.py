@@ -32,9 +32,9 @@ class UserUpdateMutation(graphene.Mutation):
         if not user.is_authenticated:
             return UserUpdateMutation(success=False, error="You must be logged in to edit your account.",
                                       user=None)
-        
-        if 'profile_picture' in kwargs:
-            kwargs['profile_picture'] = base64_to_file(kwargs['profile_picture'])
+        #
+        # if 'profile_picture' in kwargs:
+        #     kwargs['profile_picture'] = base64_to_file(kwargs['profile_picture'])
 
         if 'email' in kwargs:
             address = EmailAddress.objects.get_for_user(user, user.email)
