@@ -22,6 +22,7 @@ class RootQuery(graphene.ObjectType, UserQuery, ActivityQuery, FeedbackQuery, Re
 class Mutations(graphene.ObjectType):
     update_profile = user_mutations.UserUpdateMutation.Field()
     update_user_settings = user_mutations.UserSettingsUpdateMutation.Field()
+    update_user_device = user_mutations.UserDeviceAddMutation.Field()
     request_account_delete = user_mutations.RequestAccountDelete.Field()
 
     # Activity Mutations
