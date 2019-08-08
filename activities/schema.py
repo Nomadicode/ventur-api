@@ -30,6 +30,8 @@ class CategoryType(DjangoObjectType):
 class ActivityDateType(ObjectType):
     start_date = graphene.DateTime()
     end_date = graphene.DateTime()
+    always_available = graphene.Boolean()
+
 
 class ActivityType(DjangoObjectType):
     pk = graphene.ID()
@@ -56,6 +58,11 @@ class ActivityType(DjangoObjectType):
 
             count += 1
 
+        if len(upcoming_dates) == 0:
+            upcoming_dates.append(ActivityDateType(
+                always_available=True
+            ))
+
         return upcoming_dates
 
     def resolve_next_occurrence(self, info, **kwargs):
@@ -64,7 +71,11 @@ class ActivityType(DjangoObjectType):
         if not next_occurrence:
             next_occurrence = self.first_occurrence()
 
+        if not next_occurrence:
+            return ActivityDateType(always_available=True)
+
         return ActivityDateType(start_date=next_occurrence[0], end_date=next_occurrence[1])
+
 
     def resolve_distance(self, info, **kwargs):
         user = get_user_from_info(info)
