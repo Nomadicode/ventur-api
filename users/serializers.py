@@ -134,7 +134,7 @@ class RegisterSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
     email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
     password = serializers.CharField(required=True, write_only=True)
-    date_of_birth = serializers.DateField(required=True)
+    # date_of_birth = serializers.DateField(required=True)
 
     def validate_email(self, email):
         email = get_adapter().clean_email(email)
@@ -151,8 +151,8 @@ class RegisterSerializer(serializers.Serializer):
     def validate_name(self, name):
         return name
 
-    def validate_date_of_birth(self, date_of_birth):
-        return date_of_birth
+    # def validate_date_of_birth(self, date_of_birth):
+    #     return date_of_birth
 
     def create(self, validated_data):
         User = get_user_model()
@@ -161,8 +161,7 @@ class RegisterSerializer(serializers.Serializer):
 
         user = User(
             name=name,
-            email=validated_data.get('email', ''),
-            date_of_birth=validated_data.get('date_of_birth', None)
+            email=validated_data.get('email', '')
         )
         user.set_password(password)
         user.save()
