@@ -8,6 +8,7 @@ from graphene_django.types import DjangoObjectType
 from graphene_django import DjangoConnectionField
 
 from .models import User, UserSettings, UserDevice, AccountDeleteRequest
+from friendship.models import Friend, FriendshipRequest
 
 class AccountDeleteRequestType(DjangoObjectType):
     pk = graphene.Int()
@@ -32,6 +33,7 @@ class UserDeviceType(DjangoObjectType):
 class UserType(DjangoObjectType):
     pk = graphene.Int()
     settings = graphene.Field(UserSettingsType)
+    friend_status = graphene.String()
 
     class Meta:
         model = User
@@ -46,6 +48,26 @@ class UserType(DjangoObjectType):
             return None
 
         return self.settings.first()
+
+    def resolve_friend_status(self, info, **kwargs):
+        user = get_user_from_info(info)
+
+        if not user.is_authenticated:
+            return 'none'
+
+        if user.id == self.id:
+            return 'self'
+
+        if len(user.friendship_requests_received.filter(from_user=self.id)) > 0:
+            return 'pending'
+
+        if len(user.friendship_requests_sent.filter(to_user=self.id)) > 0:
+            return 'sent'
+
+        if len(user.friends.filter(from_user_id=self.id)) > 0:
+            return 'friend'
+
+        return 'none'
 
 
 class UserConnection(relay.Connection):

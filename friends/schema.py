@@ -118,41 +118,38 @@ class FriendQuery(object):
 
         # Remove self from results
         users = User.objects.all().exclude(id__in=(user.id,))
-        users.exclude(is_system=True)
+        users = users.exclude(is_system=True)
 
         # Remove users that have been sent requests
-        requests = FriendshipRequest.objects.filter(from_user__id=user.id)
+        # requests = FriendshipRequest.objects.filter(from_user__id=user.id)
 
-        sent_requests = []
-        for req in requests:
-            sent_requests.append(req.to_user.id)
-
-        users = users.exclude(id__in=sent_requests)
+        # sent_requests = []
+        # for req in requests:
+        #     sent_requests.append(req.to_user.id)
+        #
+        # users = users.exclude(id__in=sent_requests)
 
         # Remove users that sent user requests
-        requests = FriendshipRequest.objects.filter(to_user__id=user.id)
-        pending_requests = []
-        for req in requests:
-            pending_requests.append(req.from_user.id)
-
-        users = users.exclude(id__in=pending_requests)
+        # requests = FriendshipRequest.objects.filter(to_user__id=user.id)
+        # pending_requests = []
+        # for req in requests:
+        #     pending_requests.append(req.from_user.id)
+        #
+        # users = users.exclude(id__in=pending_requests)
 
         # Remove existing friends
-        friends = Friend.objects.filter(from_user__id=user.id)
-
-        existing_friends = []
-        for friend in friends:
-            existing_friends.append(friend.to_user.id)
-
-        users = users.exclude(id__in=existing_friends)
+        # friends = Friend.objects.filter(from_user__id=user.id)
+        #
+        # existing_friends = []
+        # for friend in friends:
+        #     existing_friends.append(friend.to_user.id)
+        #
+        # users = users.exclude(id__in=existing_friends)
 
         # Check handle
         users = users.filter(Q(handle__icontains=kwargs['query']) |
                              Q(name__icontains=kwargs['query']) |
                              Q(email__icontains=kwargs['query']))
-
-        # Remove friends that have a pending request
-
 
         return users
 
