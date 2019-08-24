@@ -190,14 +190,15 @@ class FriendQuery(object):
         users = users.exclude(id__in=existing_friends)
 
         # Refine by location
-        discard_distance = []
-        for suggest in users:
-            if suggest.location and user.location:
-                distance = get_distance(user.location, suggest.location).split(' ')[0]
-                if float(distance) > 10.0:
-                    discard_distance.append(suggest.id)
-
-        users = users.exclude(id__in=discard_distance)
+        # discard_distance = []
+        # for suggest in users:
+        #     if suggest.location and user.location:
+        #         distance, unit = get_distance(user.location, suggest.location).split(' ')
+        #         if unit == 'mi':
+        #             if float(distance) > 25.0:
+        #                 discard_distance.append(suggest.id)
+        #
+        # users = users.exclude(id__in=discard_distance)
 
         # Refine by shared interests
 
