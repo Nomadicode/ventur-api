@@ -297,7 +297,7 @@ class Dev(Base):
         }
     }
 
-    SITE_DOMAIN = 'https://api-dev.driftr.app'
+    SITE_DOMAIN = 'https://api-dev.ventur.app'
 
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.sparkpostmail.com'
@@ -351,7 +351,7 @@ class Prod(Base):
     STATICFILES_STORAGE = 'api.s3utils.StaticRootS3BotoStorage'
     STATIC_URL = 'https://%s.s3.amazonaws.com/static/' % AWS_STORAGE_BUCKET_NAME
 
-    SITE_DOMAIN = 'https://api.driftr.app'
+    SITE_DOMAIN = 'https://api.ventur.app'
 
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.sparkpostmail.com'
