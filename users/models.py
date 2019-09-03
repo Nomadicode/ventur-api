@@ -27,7 +27,7 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
     def create_system_user(self):
-        return self._create_user(email='system@driftr.app',
+        return self._create_user(email='system@ventur.app',
                                  password='m]tmHTOL?!nq9q~CMzq1008fNb9}P8@dB<ck9k%1F8Q7yx857:@ebQ6b*ATfrP3f',
                                  name='System User',
                                  is_system=True)

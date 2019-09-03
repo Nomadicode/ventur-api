@@ -30,11 +30,16 @@ def base64_to_file(encoded_str):
 
 def get_address_from_latlng(latitude, longitude):
     geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY, timeout=10)
-    if latitude and longitude:
-        location = geolocator.reverse(str(latitude) + ", " + str(longitude), sensor=True, exactly_one=True)
-        return location.name, location.address
+    location = geolocator.reverse("{0},{1}".format(latitude, longitude), sensor=True, exactly_one=True)
 
-    return None
+    name_component = [ comp for comp in location.raw['address_components'] if 'premise' in comp['types']]
+
+    name = name_component[0]['short_name'] if len(name_component) > 0 else None
+    address_parts = [a for a in location.address.split(', ') if a != name]
+
+    address = ', '.join(address_parts)
+
+    return name, address
 
 def get_latlng_from_address(address=None, city=None, state=None, location_str=None):
     geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY, timeout=10)
