@@ -127,6 +127,7 @@ class Activity(BaseEvent):
     minimum_age = models.IntegerField(default=0)
     maximum_age = models.IntegerField(default=65)
     handicap_friendly = models.BooleanField(default=False)
+    is_nsfw = models.BooleanField(default=False)
     kid_friendly = models.BooleanField(default=False)
     alcohol_present = models.BooleanField(default=False)
     groups = models.ManyToManyField(Group, related_name='allowed_groups', blank=True)

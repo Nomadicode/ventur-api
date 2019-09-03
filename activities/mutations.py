@@ -27,8 +27,10 @@ class ActivityAddMutation(graphene.Mutation):
         minimum_age = graphene.Int(required=False)
         maximum_age = graphene.Int(required=False)
         handicap_friendly = graphene.Boolean(required=False)
+        is_nsfw = graphene.Boolean(required=False)
         kid_friendly = graphene.Boolean(required=False)
         alcohol_present = graphene.Boolean(required=False)
+        address = graphene.String(required=False)
         latitude = graphene.Float(required=False)
         longitude = graphene.Float(required=False)
         start_datetime = graphene.String(required=False)
@@ -73,6 +75,7 @@ class ActivityAddMutation(graphene.Mutation):
                                                         maximum_age=kwargs['maximum_age'] if 'maximum_age' in kwargs else 65,
                                                         handicap_friendly=kwargs['handicap_friendly'] if 'handicap_friendly' in kwargs else False,
                                                         alcohol_present=kwargs['alcohol_present'] if 'alcohol_present' in kwargs else False,
+                                                        is_nsfw=kwargs['is_nsfw'] if 'is_nsfw' in kwargs else False,
                                                         kid_friendly=kwargs['kid_friendly'] if 'kid_friendly' in kwargs else False,
 
                                                         latitude=kwargs['latitude'],
