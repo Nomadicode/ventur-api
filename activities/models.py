@@ -14,6 +14,8 @@ from api.helpers import get_address_from_latlng, get_latlng_from_address
 from users.models import User
 from friends.models import Group
 
+from scheduling.models import EventManager
+
 REPEAT_CHOICES = [
     'Yearly',
     'Monthly',
@@ -22,7 +24,7 @@ REPEAT_CHOICES = [
 ]
 
 
-class ActivityManager(models.Manager):
+class ActivityManager(EventManager):
     def create_activity(self, name, latitude, longitude, user=None, start_datetime=None, end_datetime=None,
                         repeat_until=None, frequency=None, categories=None, groups=None, **extra_fields):
         if not user:
