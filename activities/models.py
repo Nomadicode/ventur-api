@@ -62,13 +62,15 @@ class ActivityManager(EventManager):
         activity.save()
 
         # region Set groups
-        if groups and len(groups) > 0:
-            activity.groups.set(groups)
+        if groups:
+            group_list = filter(None, groups)
+            activity.groups.set(group_list)
         # endregion
 
         # region Set categories
-        if categories and len(categories) > 0:
-            activity.categories.set(categories)
+        if categories:
+            category_list = filter(None, categories)
+            activity.categories.set(category_list)
         # endregion
 
         # region Set Schedule
@@ -78,12 +80,12 @@ class ActivityManager(EventManager):
                 start=parser.parse(start_datetime),
                 end=parser.parse(end_datetime)
             )
-
+            print(frequency)
             if frequency and frequency > -1:
-                frequency = REPEAT_CHOICES[frequency] if frequency < 4 else None
+                frequency_txt = REPEAT_CHOICES[frequency] if frequency < 4 else None
 
-                if frequency:
-                    schedule.repeat = 'RRULE:FREQ=' + frequency
+                if frequency_txt:
+                    schedule.repeat = 'RRULE:FREQ=' + frequency_txt
 
                 if repeat_until:
                     schedule.repeat_until = parser.parse(repeat_until)
