@@ -30,6 +30,7 @@ class ActivityAddMutation(graphene.Mutation):
         is_nsfw = graphene.Boolean(required=False)
         kid_friendly = graphene.Boolean(required=False)
         alcohol_present = graphene.Boolean(required=False)
+        location_name = graphene.String(required=False)
         address = graphene.String(required=False)
         latitude = graphene.Float(required=False)
         longitude = graphene.Float(required=False)
