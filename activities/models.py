@@ -62,12 +62,12 @@ class ActivityManager(EventManager):
         activity.save()
 
         # region Set groups
-        if groups:
+        if groups and len(groups) > 0:
             activity.groups.set(groups)
         # endregion
 
         # region Set categories
-        if categories:
+        if categories and len(categories) > 0:
             activity.categories.set(categories)
         # endregion
 
