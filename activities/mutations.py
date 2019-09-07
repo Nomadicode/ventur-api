@@ -84,7 +84,7 @@ class ActivityAddMutation(graphene.Mutation):
 
                                                         start_datetime=kwargs['start_datetime'] if 'start_datetime' in kwargs else None,
                                                         end_datetime=kwargs['end_datetime'] if 'end_datetime' in kwargs else None,
-                                                        frequency=kwargs['frequency'] if 'frequency' in kwargs else None,
+                                                        frequency=kwargs['frequency'] if 'frequency' in kwargs else -1,
                                                         repeat_until=kwargs['repeat_until'] if 'repeat_until' in kwargs else None,
 
                                                         groups=groups,
