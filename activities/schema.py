@@ -40,9 +40,16 @@ class ActivityType(DjangoObjectType):
     next_occurrence = graphene.Field(ActivityDateType)
     distance = graphene.String()
     saved = graphene.Boolean()
+    price = graphene.Float()
 
     class Meta:
         model = Activity
+
+    def resolve_price(self, info, **kwargs):
+        if self.minimum_price:
+            return (self.minimum_price + self.maximum_price) / 2
+        else:
+            return self.maximum_price
 
     def resolve_upcoming_dates(self, info, **kwargs):
         upcoming_dates = []
@@ -175,7 +182,9 @@ class ActivityQuery(object):
                     activities = activities.for_period(from_date=start_date, to_date=end_date)
 
                 if 'price' in filters and filters['price'] is not None:
-                    activities = activities.filter(Q(price__lte=filters['price']) | Q(price__isnull=True))
+                    activities = activities.filter(Q(maximum_price__isnull=True) |
+                                                   Q(minimum_price__isnull=False, minimum_price__lte=filters['price']) |
+                                                   Q(minimum_price__isnull=True, maximum_price__lte=filters['price']))
 
                 if 'duration' in filters and filters['duration'] is not None:
                     activities = activities.filter(Q(duration__lte=filters['duration']) | Q(duration__isnull=True))
