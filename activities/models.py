@@ -109,12 +109,24 @@ class Category(models.Model):
         return self.name
 
 
+class Currency(models.Model):
+    code = models.CharField(max_length=3)
+    name = models.CharField(max_length=128)
+    symbol = models.CharField(max_length=10)
+    decimal_digits = models.IntegerField(default=2)
+    decimal_separator = models.CharField(max_length=1)
+    thousands_separator = models.CharField(max_length=1)
+    space_symbol = models.BooleanField(default=False)
+    symbol_left = models.BooleanField(default=True)
+
+
 class Location(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
     address = models.CharField(max_length=128)
     latitude = models.FloatField()
     longitude = models.FloatField()
     point = geomodels.PointField(null=True, blank=True)
+    currency = models.ForeignKey(Currency, related_name='currency', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.address
@@ -127,7 +139,8 @@ class Activity(BaseEvent):
     categories = models.ManyToManyField(Category, related_name='categories', blank=True)
     location = models.ForeignKey(Location, related_name='location', on_delete=models.DO_NOTHING)
     duration = models.IntegerField(null=True, blank=True)
-    price = models.FloatField(null=True, blank=True)
+    minimum_price = models.FloatField(null=True, blank=True, default=0)
+    maximum_price = models.FloatField(null=True, blank=True)
     minimum_age = models.IntegerField(default=0)
     maximum_age = models.IntegerField(default=65)
     handicap_friendly = models.BooleanField(default=False)
