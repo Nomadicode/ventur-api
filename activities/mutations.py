@@ -23,6 +23,8 @@ class ActivityAddMutation(graphene.Mutation):
         description = graphene.String(required=False)
         categories = graphene.String(required=False)
         duration = graphene.Int(required=False)
+        minimum_price = graphene.Float(required=False)
+        maximum_price = graphene.Float(required=False)
         price = graphene.Float(required=False)
         minimum_age = graphene.Int(required=False)
         maximum_age = graphene.Int(required=False)
@@ -37,6 +39,8 @@ class ActivityAddMutation(graphene.Mutation):
         start_datetime = graphene.String(required=False)
         end_datetime = graphene.String(required=False)
         frequency = graphene.Int(required=False)
+        interval = graphene.Int(required=False)
+        repeat_days = graphene.String(required=False)
         repeat_until = graphene.String(required=False)
         groups = graphene.String(required=False)
         system = graphene.Boolean(required=False)
@@ -71,7 +75,8 @@ class ActivityAddMutation(graphene.Mutation):
                                                         media=kwargs['media'] if 'media' in kwargs else None,
                                                         description=kwargs['description'] if 'description' in kwargs else None,
                                                         duration=kwargs['duration'] if 'duration' in kwargs else None,
-                                                        price=kwargs['price'] if 'price' in kwargs else None,
+                                                        minimum_price=kwargs['minimum_price'] if 'minimum_price' in kwargs else None,
+                                                        maximum_price=kwargs['maximum_price'] if 'maximum_price' in kwargs else kwargs['price'] if 'price' in kwargs else None,
                                                         minimum_age=kwargs['minimum_age'] if 'minimum_age' in kwargs else 0,
                                                         maximum_age=kwargs['maximum_age'] if 'maximum_age' in kwargs else 65,
                                                         handicap_friendly=kwargs['handicap_friendly'] if 'handicap_friendly' in kwargs else False,
@@ -86,6 +91,8 @@ class ActivityAddMutation(graphene.Mutation):
                                                         end_datetime=kwargs['end_datetime'] if 'end_datetime' in kwargs else None,
                                                         frequency=kwargs['frequency'] if 'frequency' in kwargs else -1,
                                                         repeat_until=kwargs['repeat_until'] if 'repeat_until' in kwargs else None,
+                                                        interval=kwargs['interval'] if 'interval' in kwargs else 1,
+                                                        repeat_days=kwargs['repeat_days'] if 'repeat_days' in kwargs else None,
 
                                                         groups=groups,
                                                         categories=categories)
